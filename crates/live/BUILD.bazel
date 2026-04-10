@@ -10,7 +10,10 @@ rust_library(
         ["src/**/*.rs"],
         exclude = ["src/**/tests.rs"],
     ),
-    crate_features = [],
+    # `defi` gates the DataEvent::DeFi arm in runner.rs so the live
+    # runtime can route DeFi data events to the engine — required by
+    # the blockchain adapter.
+    crate_features = ["defi"],
     crate_name = "nautilus_live",
     edition = "2024",
     deps = [

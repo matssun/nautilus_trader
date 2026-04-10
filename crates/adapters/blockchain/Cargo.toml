@@ -21,7 +21,17 @@ name = "nautilus_blockchain"
 crate-type = ["rlib", "cdylib"]
 
 [features]
-default = []
+# NOTE (monorepo-local-fixes fork only): `hypersync` is promoted to a
+# default feature so that Bazel's crate_universe resolves
+# hypersync-client / hypersync-schema and their transitive deps.
+# rules_rust 0.68's crate.from_cargo does not expose per-crate feature
+# overrides, and without this the gated modules under src/hypersync,
+# src/cache, src/data, src/execution, src/exchanges, src/factories,
+# and src/services cannot compile — leaving the blockchain adapter a
+# skeleton of RPC primitives with no actual Nautilus integration.
+# Upstream should not take this change; it's strictly a Bazel build
+# concern.
+default = ["hypersync"]
 extension-module = [
   "nautilus-common/extension-module",
   "nautilus-core/extension-module",

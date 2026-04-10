@@ -12,7 +12,10 @@ rust_library(
         ["src/**/*.rs"],
         exclude = ["src/**/tests.rs"],
     ),
-    crate_features = [],
+    # `defi` enables the DeFi data client / engine paths (src/defi/**)
+    # required by the blockchain adapter. No extra external deps
+    # needed — the DeFi code references only workspace internals.
+    crate_features = ["defi"],
     crate_name = "nautilus_data",
     edition = "2024",
     proc_macro_deps = [

@@ -1,11 +1,14 @@
 # nautilus-model — domain model (instruments, orders, prices, quantities,
-# order books, greeks). Depends only on nautilus-core among workspace
-# internals.
+# order books, greeks, plus the DeFi on-chain domain types in src/defi/).
+# Depends only on nautilus-core among workspace internals.
 #
-# Built with the `high-precision` feature (128-bit price/quantity) to
-# match the adapter default. The `ffi`, `python`, and `defi` features
-# are left off. The build.rs script is only non-trivial under the
-# `ffi` feature; without it, the script is a no-op that emits env vars
+# Features enabled:
+#   - high-precision (128-bit price/quantity)
+#   - defi           (AMM/DEX/pool types, requires alloy-primitives)
+#   - stubs          (test-default constructors used by downstream crates)
+#
+# `ffi` and `python` are intentionally off. The build.rs script is only
+# non-trivial under the `ffi` feature; without it, it emits env vars
 # and rerun hints — we keep it wired so cargo_build_script's default
 # OUT_DIR / env forwarding still applies.
 
@@ -21,6 +24,7 @@ cargo_build_script(
         "CARGO_PKG_VERSION": "0.56.0",
     },
     crate_features = [
+        "defi",
         "high-precision",
         "stubs",
     ],
@@ -44,6 +48,11 @@ rust_library(
     # by default, so we ship it as compile_data.
     compile_data = ["Cargo.toml"],
     crate_features = [
+        # `defi` turns on the DeFi / on-chain domain types in
+        # src/defi/** and also requires `high-precision` implicitly
+        # for 18-decimal wei accuracy. It adds `alloy-primitives` as
+        # a required dep (see below).
+        "defi",
         "high-precision",
         # `stubs` exposes test-default constructors used by downstream
         # crates (e.g. nautilus-common::testing). It only adds the
@@ -60,6 +69,7 @@ rust_library(
         ":build_script",
         "//crates/core:nautilus_core",
         "@nt_crates//:ahash",
+        "@nt_crates//:alloy-primitives",
         "@nt_crates//:anyhow",
         "@nt_crates//:arrow",
         "@nt_crates//:chrono",

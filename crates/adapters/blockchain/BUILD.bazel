@@ -1,0 +1,66 @@
+# nautilus-blockchain — DeFi / on-chain integration adapter.
+#
+# Unlike the CEX adapters, this one requires the whole `defi` feature
+# cascade through nautilus-model / common / data / live, plus
+# `postgres` on nautilus-infrastructure (its cache backs on-chain
+# state in Postgres).
+#
+# `hypersync` is enabled here, which pulls in hypersync-client and
+# hypersync-schema (Envio's HyperSync API for fast historical log
+# retrieval). Without it, the cache / data / execution / exchanges /
+# factories / services modules are all `#[cfg]`-gated off and the
+# adapter is a skeleton. The `hypersync` feature is forced on at the
+# Cargo level (default = ["hypersync"] in blockchain's Cargo.toml on
+# the monorepo-local-fixes fork) so crate_universe resolves the
+# optional hypersync-* deps.
+#
+# `python` / `extension-module` / `turmoil` are still off.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_blockchain",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = ["hypersync"],
+    crate_name = "nautilus_blockchain",
+    edition = "2024",
+    proc_macro_deps = [
+        "@nt_crates//:async-trait",
+        "@nt_crates//:enum_dispatch",
+    ],
+    deps = [
+        "//crates/common:nautilus_common",
+        "//crates/core:nautilus_core",
+        "//crates/infrastructure:nautilus_infrastructure",
+        "//crates/live:nautilus_live",
+        "//crates/model:nautilus_model",
+        "//crates/network:nautilus_network",
+        "//crates/system:nautilus_system",
+        "@nt_crates//:ahash",
+        "@nt_crates//:alloy",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:async-stream",
+        "@nt_crates//:bon",
+        "@nt_crates//:bytes",
+        "@nt_crates//:dotenvy",
+        "@nt_crates//:futures-util",
+        "@nt_crates//:hypersync-client",
+        "@nt_crates//:hypersync-schema",
+        "@nt_crates//:log",
+        "@nt_crates//:rust_decimal",
+        "@nt_crates//:serde",
+        "@nt_crates//:serde_json",
+        "@nt_crates//:sqlx",
+        "@nt_crates//:strum",
+        "@nt_crates//:thiserror",
+        "@nt_crates//:tokio",
+        "@nt_crates//:tokio-tungstenite",
+        "@nt_crates//:tokio-util",
+        "@nt_crates//:ustr",
+    ],
+)

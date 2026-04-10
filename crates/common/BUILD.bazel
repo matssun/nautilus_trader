@@ -32,11 +32,16 @@ rust_library(
         ["src/**/*.rs"],
         exclude = ["src/**/tests.rs"],
     ),
-    # Cargo defaults (`indicators`, `rstest`) are off. `live` is enabled
-    # so downstream crates (infrastructure, live, trading) can use the
-    # tokio-based runtime glue — this only pulls the `tokio` dep, no
-    # production bloat for non-live consumers.
-    crate_features = ["live"],
+    # Cargo defaults (`indicators`, `rstest`) are off. `live` enables
+    # the tokio-based runtime glue (used by infrastructure / live /
+    # trading downstream). `defi` pulls in the DeFi data client
+    # messages / cache / data_actor paths (src/defi/** and
+    # src/messages/defi/**) — required by the blockchain adapter
+    # further down the chain.
+    crate_features = [
+        "defi",
+        "live",
+    ],
     crate_name = "nautilus_common",
     edition = "2024",
     proc_macro_deps = [

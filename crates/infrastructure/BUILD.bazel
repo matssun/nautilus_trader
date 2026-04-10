@@ -1,8 +1,15 @@
 # nautilus-infrastructure — cache, msgbus, message store backed by
-# Redis or Postgres. Cargo default enables `redis`; we leave both
-# redis and postgres OFF for phase 3 (they pull in C-backed client
-# libraries we haven't wired through Bazel yet). Adapters don't need
-# them, and the pure in-memory paths compile fine without.
+# Redis or Postgres. `postgres` is enabled here because the
+# blockchain adapter requires a Postgres-backed cache for on-chain
+# state (blocks, logs, pool state). `redis` (the Cargo default) is
+# still off — nothing in our build set needs it yet.
+#
+# Postgres is pulled in via `sqlx` with the `postgres` + `runtime-tokio`
+# drivers. NT's source uses only the runtime-checked `sqlx::query(...)`
+# builder and FromRow / PgRow types — NOT the `sqlx::query!` /
+# `sqlx::query_as!` compile-time-checked macros — so there is no
+# .sqlx offline query cache to wire into Bazel, and no live DB
+# connection required at build time.
 
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
@@ -14,7 +21,7 @@ rust_library(
         ["src/**/*.rs"],
         exclude = ["src/**/tests.rs"],
     ),
-    crate_features = [],
+    crate_features = ["postgres"],
     crate_name = "nautilus_infrastructure",
     edition = "2024",
     proc_macro_deps = [
@@ -39,6 +46,7 @@ rust_library(
         "@nt_crates//:rust_decimal",
         "@nt_crates//:serde",
         "@nt_crates//:serde_json",
+        "@nt_crates//:sqlx",
         "@nt_crates//:tokio",
         "@nt_crates//:ustr",
     ],
