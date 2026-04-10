@@ -1,0 +1,55 @@
+# nautilus-dydx — dYdX v4 adapter. Cosmos SDK + gRPC + protobuf.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_dydx",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = ["high-precision"],
+    crate_name = "nautilus_dydx",
+    edition = "2024",
+    proc_macro_deps = [
+        "@nt_crates//:async-trait",
+    ],
+    deps = [
+        "//crates/common:nautilus_common",
+        "//crates/core:nautilus_core",
+        "//crates/live:nautilus_live",
+        "//crates/model:nautilus_model",
+        "//crates/network:nautilus_network",
+        "//crates/system:nautilus_system",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:arc-swap",
+        "@nt_crates//:async-stream",
+        "@nt_crates//:base64",
+        "@nt_crates//:bon",
+        "@nt_crates//:chrono",
+        "@nt_crates//:cosmrs",
+        "@nt_crates//:dashmap",
+        "@nt_crates//:derive_builder",
+        "@nt_crates//:dotenvy",
+        "@nt_crates//:dydx-proto",
+        "@nt_crates//:futures-util",
+        "@nt_crates//:log",
+        "@nt_crates//:prost",
+        "@nt_crates//:rust_decimal",
+        "@nt_crates//:rustls",
+        "@nt_crates//:serde",
+        "@nt_crates//:serde_json",
+        "@nt_crates//:serde_with",
+        "@nt_crates//:strum",
+        "@nt_crates//:thiserror",
+        "@nt_crates//:tokio",
+        "@nt_crates//:tokio-tungstenite",
+        "@nt_crates//:tokio-util",
+        "@nt_crates//:tonic",
+        "@nt_crates//:urlencoding",
+        "@nt_crates//:ustr",
+    ],
+)

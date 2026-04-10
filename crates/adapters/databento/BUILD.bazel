@@ -1,0 +1,47 @@
+# nautilus-databento — Databento market data adapter.
+# Default features: `live` + `high-precision`.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_databento",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = [
+        "high-precision",
+        "live",
+    ],
+    crate_name = "nautilus_databento",
+    edition = "2024",
+    proc_macro_deps = [
+        "@nt_crates//:async-trait",
+    ],
+    deps = [
+        "//crates/common:nautilus_common",
+        "//crates/core:nautilus_core",
+        "//crates/live:nautilus_live",
+        "//crates/model:nautilus_model",
+        "//crates/network:nautilus_network",
+        "//crates/system:nautilus_system",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:databento",
+        "@nt_crates//:dotenvy",
+        "@nt_crates//:fallible-streaming-iterator",
+        "@nt_crates//:indexmap",
+        "@nt_crates//:itoa",
+        "@nt_crates//:log",
+        "@nt_crates//:serde",
+        "@nt_crates//:serde_json",
+        "@nt_crates//:strum",
+        "@nt_crates//:time",
+        "@nt_crates//:tokio",
+        "@nt_crates//:tokio-util",
+        "@nt_crates//:ustr",
+        "@nt_crates//:zeroize",
+    ],
+)

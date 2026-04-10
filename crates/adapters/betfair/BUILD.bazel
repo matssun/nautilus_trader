@@ -1,0 +1,49 @@
+# nautilus-betfair — Betfair exchange adapter.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_betfair",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = ["high-precision"],
+    crate_name = "nautilus_betfair",
+    edition = "2024",
+    proc_macro_deps = [
+        "//crates/persistence/macros:nautilus_persistence_macros",
+        "@nt_crates//:async-trait",
+    ],
+    deps = [
+        "//crates/common:nautilus_common",
+        "//crates/core:nautilus_core",
+        "//crates/live:nautilus_live",
+        "//crates/model:nautilus_model",
+        "//crates/network:nautilus_network",
+        "//crates/serialization:nautilus_serialization",
+        "//crates/system:nautilus_system",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:arrow",
+        "@nt_crates//:bon",
+        "@nt_crates//:bytes",
+        "@nt_crates//:bzip2",
+        "@nt_crates//:chrono",
+        "@nt_crates//:flate2",
+        "@nt_crates//:log",
+        "@nt_crates//:rust_decimal",
+        "@nt_crates//:serde",
+        "@nt_crates//:serde_json",
+        "@nt_crates//:strum",
+        "@nt_crates//:thiserror",
+        "@nt_crates//:tokio",
+        "@nt_crates//:tokio-tungstenite",
+        "@nt_crates//:tokio-util",
+        "@nt_crates//:urlencoding",
+        "@nt_crates//:ustr",
+        "@nt_crates//:zeroize",
+    ],
+)

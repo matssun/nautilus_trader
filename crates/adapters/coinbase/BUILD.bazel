@@ -1,0 +1,54 @@
+# nautilus-coinbase — Coinbase Advanced Trade adapter.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_coinbase",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = ["high-precision"],
+    crate_name = "nautilus_coinbase",
+    edition = "2024",
+    proc_macro_deps = [
+        "@nt_crates//:async-trait",
+        "@nt_crates//:rust_decimal_macros",
+    ],
+    deps = [
+        "//crates/common:nautilus_common",
+        "//crates/core:nautilus_core",
+        "//crates/live:nautilus_live",
+        "//crates/model:nautilus_model",
+        "//crates/network:nautilus_network",
+        "//crates/system:nautilus_system",
+        "//crates/trading:nautilus_trading",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:arc-swap",
+        "@nt_crates//:aws-lc-rs",
+        "@nt_crates//:base64",
+        "@nt_crates//:bon",
+        "@nt_crates//:chrono",
+        "@nt_crates//:dashmap",
+        "@nt_crates//:derive_builder",
+        "@nt_crates//:futures-util",
+        "@nt_crates//:log",
+        "@nt_crates//:pem",
+        "@nt_crates//:rand",
+        "@nt_crates//:rust_decimal",
+        "@nt_crates//:serde",
+        "@nt_crates//:serde_json",
+        "@nt_crates//:strum",
+        "@nt_crates//:thiserror",
+        "@nt_crates//:tokio",
+        "@nt_crates//:tokio-tungstenite",
+        "@nt_crates//:tokio-util",
+        "@nt_crates//:url",
+        "@nt_crates//:ustr",
+        "@nt_crates//:uuid",
+        "@nt_crates//:zeroize",
+    ],
+)

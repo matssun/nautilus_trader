@@ -1,0 +1,53 @@
+# nautilus-bybit — Bybit exchange adapter.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_bybit",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = ["high-precision"],
+    crate_name = "nautilus_bybit",
+    edition = "2024",
+    proc_macro_deps = [
+        "@nt_crates//:async-trait",
+        "@nt_crates//:serde_repr",
+    ],
+    deps = [
+        "//crates/common:nautilus_common",
+        "//crates/core:nautilus_core",
+        "//crates/execution:nautilus_execution",
+        "//crates/live:nautilus_live",
+        "//crates/model:nautilus_model",
+        "//crates/network:nautilus_network",
+        "//crates/system:nautilus_system",
+        "//crates/trading:nautilus_trading",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:arc-swap",
+        "@nt_crates//:async-stream",
+        "@nt_crates//:aws-lc-rs",
+        "@nt_crates//:bon",
+        "@nt_crates//:chrono",
+        "@nt_crates//:dashmap",
+        "@nt_crates//:derive_builder",
+        "@nt_crates//:dotenvy",
+        "@nt_crates//:futures-util",
+        "@nt_crates//:log",
+        "@nt_crates//:rust_decimal",
+        "@nt_crates//:serde",
+        "@nt_crates//:serde_json",
+        "@nt_crates//:serde_urlencoded",
+        "@nt_crates//:strum",
+        "@nt_crates//:thiserror",
+        "@nt_crates//:tokio",
+        "@nt_crates//:tokio-tungstenite",
+        "@nt_crates//:tokio-util",
+        "@nt_crates//:ustr",
+        "@nt_crates//:zeroize",
+    ],
+)
