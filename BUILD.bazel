@@ -1,33 +1,93 @@
 # NautilusTrader — production-grade Rust-native trading engine
 #
-# This BUILD file wraps the already-built Python package as a Bazel py_library.
-# The compiled artifacts (.so files from Cython + Rust PyO3) are produced by
-# NautilusTrader's own build system via:
+# This BUILD file integrates NautilusTrader's native build (Cargo + Cython)
+# with Bazel by shelling out to its upstream Makefile target `make build-debug`.
+# Replicating the full build in Bazel would require mapping 40+ Rust crates
+# into rules_rust's crate_universe and handling ~110 Cython extensions, which
+# is out of scope while we evaluate whether NautilusTrader fits our needs.
 #
-#     cd third_party/nautilus_trader && make build-debug   # or: make build
+# Two public targets:
 #
-# That build step runs cargo + Cython and copies the .so files into
-# nautilus_trader/**/. This BUILD file then treats those .so files as
-# pre-existing artifacts and exposes everything to Bazel consumers.
+#   :build_native
+#       genrule that runs `make build-debug` inside this submodule. Bazel
+#       tracks the Rust / Cython source globs as inputs, so the native build
+#       re-runs when they change. The .so files land in the source tree
+#       (nautilus_trader/**/), which the :nautilus_trader py_library picks
+#       up via a glob. The genrule's own output is just a stamp file.
 #
-# NOTE: This means `bazel build //third_party/nautilus_trader` does NOT
-# (re)compile the Rust/Cython code. The build must be run manually when
-# Rust or .pyx sources change. If the .so files are missing, downstream
-# Bazel targets will fail with import errors at runtime.
+#   :nautilus_trader
+#       Thin py_library wrapping the Python sources and globbed .so / .pyi
+#       artifacts. Depends on :build_native so that consumers get an
+#       automatic incremental rebuild when Rust / Cython sources change.
+#
+# ─── FRESH-CLONE BOOTSTRAP (one time, per workspace) ──────────────────────
+#
+# Bazel evaluates globs during the loading phase, BEFORE any action runs.
+# On a fresh clone, the .so glob in :nautilus_trader returns empty, so a
+# single `bazel build` will run :build_native but the resulting .so files
+# won't be picked up by the py_library in the same invocation.
+#
+# To bootstrap a workspace, run:
+#
+#     bazel run //third_party/nautilus_trader:build_native
+#     bazel build //third_party/nautilus_trader:nautilus_trader
+#
+# After that, everything works automatically: incremental rebuilds are
+# triggered by changes to the declared source globs.
+#
+# ─── REQUIREMENTS ─────────────────────────────────────────────────────────
+#
+# The host needs: Rust (see rust-toolchain.toml), uv (see pyproject.toml),
+# clang, and make. The genrule runs with `local = True` and no sandbox
+# because cargo needs network access and writes into the submodule's
+# target/ directory.
 
 load("@rules_python//python:defs.bzl", "py_library")
 
 package(default_visibility = ["//visibility:public"])
 
+genrule(
+    name = "build_native",
+    srcs = glob(
+        [
+            "Cargo.toml",
+            "Cargo.lock",
+            "build.py",
+            "pyproject.toml",
+            "uv.lock",
+            "rust-toolchain.toml",
+            "Makefile",
+            "crates/**/*.rs",
+            "crates/**/*.toml",
+            "crates/**/*.pest",
+            "nautilus_trader/**/*.pyx",
+            "nautilus_trader/**/*.pxd",
+            "nautilus_trader/**/*.h",
+        ],
+        allow_empty = True,
+    ),
+    outs = ["build_native.stamp"],
+    # Bazel strips PATH for sandboxed actions and restricts it even for
+    # local actions. Restore a sensible PATH covering Homebrew (macOS),
+    # cargo (~/.cargo/bin), and standard system bins so that make, uv,
+    # cargo, rustc, and clang are all reachable.
+    cmd = "export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$$HOME/.cargo/bin:$$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$$PATH && (cd $$(dirname $(location build.py)) && make build-debug) 1>&2 && date -u +%Y-%m-%dT%H:%M:%SZ > $@",
+    executable = True,
+    local = True,
+    message = "Building NautilusTrader native extensions (cargo + Cython)",
+    tags = [
+        "no-cache",
+        "no-remote",
+        "no-sandbox",
+        "requires-network",
+    ],
+)
+
 py_library(
     name = "nautilus_trader",
     srcs = glob(
-        [
-            "nautilus_trader/**/*.py",
-        ],
-        exclude = [
-            "nautilus_trader/**/__pycache__/**",
-        ],
+        ["nautilus_trader/**/*.py"],
+        exclude = ["nautilus_trader/**/__pycache__/**"],
     ),
     data = glob(
         [
@@ -37,6 +97,6 @@ py_library(
             "nautilus_trader/py.typed",
         ],
         allow_empty = True,
-    ),
+    ) + [":build_native"],
     imports = ["."],
 )
