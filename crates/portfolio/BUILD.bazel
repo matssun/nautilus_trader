@@ -1,0 +1,31 @@
+# nautilus-portfolio — portfolio accounting and position tracking.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_portfolio",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = [],
+    crate_name = "nautilus_portfolio",
+    edition = "2024",
+    proc_macro_deps = [
+        "@nt_crates//:rust_decimal_macros",
+    ],
+    deps = [
+        "//crates/analysis:nautilus_analysis",
+        "//crates/common:nautilus_common",
+        "//crates/core:nautilus_core",
+        "//crates/model:nautilus_model",
+        "@nt_crates//:ahash",
+        "@nt_crates//:bon",
+        "@nt_crates//:log",
+        "@nt_crates//:rust_decimal",
+        "@nt_crates//:serde",
+        "@nt_crates//:serde_json",
+    ],
+)

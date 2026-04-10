@@ -1,0 +1,80 @@
+# nautilus-model — domain model (instruments, orders, prices, quantities,
+# order books, greeks). Depends only on nautilus-core among workspace
+# internals.
+#
+# Built with the `high-precision` feature (128-bit price/quantity) to
+# match the adapter default. The `ffi`, `python`, and `defi` features
+# are left off. The build.rs script is only non-trivial under the
+# `ffi` feature; without it, the script is a no-op that emits env vars
+# and rerun hints — we keep it wired so cargo_build_script's default
+# OUT_DIR / env forwarding still applies.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
+
+package(default_visibility = ["//visibility:public"])
+
+cargo_build_script(
+    name = "build_script",
+    srcs = ["build.rs"],
+    build_script_env = {
+        "CARGO_PKG_VERSION": "0.56.0",
+    },
+    crate_features = [
+        "high-precision",
+        "stubs",
+    ],
+    data = [
+        "cbindgen.toml",
+        "cbindgen_cython.toml",
+    ],
+    edition = "2024",
+    deps = [],
+)
+
+rust_library(
+    name = "nautilus_model",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    # rstest's `#[fixture]` proc-macro calls `proc-macro-crate` at
+    # expansion time, which reads the crate's Cargo.toml via
+    # CARGO_MANIFEST_DIR. In Bazel's sandbox the file isn't present
+    # by default, so we ship it as compile_data.
+    compile_data = ["Cargo.toml"],
+    crate_features = [
+        "high-precision",
+        # `stubs` exposes test-default constructors used by downstream
+        # crates (e.g. nautilus-common::testing). It only adds the
+        # optional `rstest` dep — no production bloat.
+        "stubs",
+    ],
+    crate_name = "nautilus_model",
+    edition = "2024",
+    proc_macro_deps = [
+        "@nt_crates//:enum_dispatch",
+        "@nt_crates//:rust_decimal_macros",
+    ],
+    deps = [
+        ":build_script",
+        "//crates/core:nautilus_core",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:arrow",
+        "@nt_crates//:chrono",
+        "@nt_crates//:dashmap",
+        "@nt_crates//:derive_builder",
+        "@nt_crates//:implied-vol",
+        "@nt_crates//:indexmap",
+        "@nt_crates//:log",
+        "@nt_crates//:rstest",
+        "@nt_crates//:rust_decimal",
+        "@nt_crates//:serde",
+        "@nt_crates//:serde_json",
+        "@nt_crates//:strum",
+        "@nt_crates//:tabled",
+        "@nt_crates//:thiserror",
+        "@nt_crates//:ustr",
+    ],
+)

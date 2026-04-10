@@ -1,0 +1,70 @@
+# nautilus-common — shared machinery: cache, message bus, clocks, runner,
+# runtime, timers. Depends on nautilus-core and nautilus-model among
+# workspace internals. The Cargo defaults (`indicators`, `rstest`) are
+# intentionally disabled — indicators would pull in the nautilus-indicators
+# crate which is out of the phase-3 build set, and `rstest` is only needed
+# for test-only stubs.
+#
+# build.rs is a no-op unless the `ffi` feature is set (which we don't).
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
+
+package(default_visibility = ["//visibility:public"])
+
+cargo_build_script(
+    name = "build_script",
+    srcs = ["build.rs"],
+    build_script_env = {
+        "CARGO_PKG_VERSION": "0.56.0",
+    },
+    data = [
+        "cbindgen.toml",
+        "cbindgen_cython.toml",
+    ],
+    edition = "2024",
+    deps = [],
+)
+
+rust_library(
+    name = "nautilus_common",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    # Cargo defaults (`indicators`, `rstest`) are off. `live` is enabled
+    # so downstream crates (infrastructure, live, trading) can use the
+    # tokio-based runtime glue — this only pulls the `tokio` dep, no
+    # production bloat for non-live consumers.
+    crate_features = ["live"],
+    crate_name = "nautilus_common",
+    edition = "2024",
+    proc_macro_deps = [
+        "@nt_crates//:async-trait",
+    ],
+    deps = [
+        ":build_script",
+        "//crates/core:nautilus_core",
+        "//crates/model:nautilus_model",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:arraydeque",
+        "@nt_crates//:async-stream",
+        "@nt_crates//:bon",
+        "@nt_crates//:bytes",
+        "@nt_crates//:chrono",
+        "@nt_crates//:derive_builder",
+        "@nt_crates//:futures",
+        "@nt_crates//:indexmap",
+        "@nt_crates//:log",
+        "@nt_crates//:regex",
+        "@nt_crates//:rust_decimal",
+        "@nt_crates//:serde",
+        "@nt_crates//:serde_json",
+        "@nt_crates//:smallvec",
+        "@nt_crates//:strum",
+        "@nt_crates//:sysinfo",
+        "@nt_crates//:tokio",
+        "@nt_crates//:ustr",
+    ],
+)

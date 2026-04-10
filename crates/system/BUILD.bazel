@@ -1,0 +1,35 @@
+# nautilus-system — top-level kernel / node orchestration.
+# `streaming` feature would require nautilus-persistence (not in phase
+# 3 build set). `live` feature is purely a pass-through to
+# nautilus-common/live, which we already enable unconditionally.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_system",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = ["live"],
+    crate_name = "nautilus_system",
+    edition = "2024",
+    deps = [
+        "//crates/common:nautilus_common",
+        "//crates/core:nautilus_core",
+        "//crates/data:nautilus_data",
+        "//crates/execution:nautilus_execution",
+        "//crates/model:nautilus_model",
+        "//crates/portfolio:nautilus_portfolio",
+        "//crates/risk:nautilus_risk",
+        "//crates/trading:nautilus_trading",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:bon",
+        "@nt_crates//:log",
+        "@nt_crates//:sysinfo",
+        "@nt_crates//:ustr",
+    ],
+)

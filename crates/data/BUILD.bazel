@@ -1,0 +1,34 @@
+# nautilus-data — data engine, aggregation, caches for market data.
+# No build script. Streaming / persistence feature left off (requires
+# nautilus-persistence which is not in the phase-3 build set).
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_data",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = [],
+    crate_name = "nautilus_data",
+    edition = "2024",
+    proc_macro_deps = [
+        "@nt_crates//:async-trait",
+    ],
+    deps = [
+        "//crates/common:nautilus_common",
+        "//crates/core:nautilus_core",
+        "//crates/model:nautilus_model",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:bon",
+        "@nt_crates//:chrono",
+        "@nt_crates//:futures",
+        "@nt_crates//:indexmap",
+        "@nt_crates//:log",
+        "@nt_crates//:ustr",
+    ],
+)

@@ -1,0 +1,35 @@
+# nautilus-trading — strategy engine and controllers.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_trading",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = [],
+    crate_name = "nautilus_trading",
+    edition = "2024",
+    deps = [
+        "//crates/common:nautilus_common",
+        "//crates/core:nautilus_core",
+        "//crates/execution:nautilus_execution",
+        "//crates/model:nautilus_model",
+        "//crates/portfolio:nautilus_portfolio",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:bon",
+        "@nt_crates//:chrono",
+        "@nt_crates//:chrono-tz",
+        "@nt_crates//:indexmap",
+        "@nt_crates//:log",
+        "@nt_crates//:rust_decimal",
+        "@nt_crates//:serde",
+        "@nt_crates//:serde_json",
+        "@nt_crates//:strum",
+        "@nt_crates//:ustr",
+    ],
+)

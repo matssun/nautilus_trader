@@ -1,0 +1,38 @@
+# nautilus-live — live trading node runtime.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_live",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = [],
+    crate_name = "nautilus_live",
+    edition = "2024",
+    deps = [
+        "//crates/common:nautilus_common",
+        "//crates/core:nautilus_core",
+        "//crates/data:nautilus_data",
+        "//crates/execution:nautilus_execution",
+        "//crates/model:nautilus_model",
+        "//crates/portfolio:nautilus_portfolio",
+        "//crates/risk:nautilus_risk",
+        "//crates/system:nautilus_system",
+        "//crates/trading:nautilus_trading",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:bon",
+        "@nt_crates//:indexmap",
+        "@nt_crates//:log",
+        "@nt_crates//:rust_decimal",
+        "@nt_crates//:serde",
+        "@nt_crates//:serde_json",
+        "@nt_crates//:tabled",
+        "@nt_crates//:tokio",
+        "@nt_crates//:ustr",
+    ],
+)

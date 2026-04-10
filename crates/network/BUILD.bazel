@@ -1,0 +1,46 @@
+# nautilus-network — async HTTP/WebSocket/TLS machinery for adapters.
+# No build script, no defaults enabled.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_network",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = [],
+    crate_name = "nautilus_network",
+    edition = "2024",
+    deps = [
+        "//crates/core:nautilus_core",
+        "//crates/cryptography:nautilus_cryptography",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:bon",
+        "@nt_crates//:bytes",
+        "@nt_crates//:dashmap",
+        "@nt_crates//:futures",
+        "@nt_crates//:futures-util",
+        "@nt_crates//:http",
+        "@nt_crates//:log",
+        "@nt_crates//:memchr",
+        "@nt_crates//:rand",
+        "@nt_crates//:reqwest",
+        "@nt_crates//:rustls",
+        "@nt_crates//:rustls-pemfile",
+        "@nt_crates//:serde",
+        "@nt_crates//:serde_urlencoded",
+        "@nt_crates//:strum",
+        "@nt_crates//:thiserror",
+        "@nt_crates//:tokio",
+        "@nt_crates//:tokio-rustls",
+        "@nt_crates//:tokio-tungstenite",
+        "@nt_crates//:tokio-util",
+        "@nt_crates//:url",
+        "@nt_crates//:ustr",
+        "@nt_crates//:webpki-roots",
+    ],
+)

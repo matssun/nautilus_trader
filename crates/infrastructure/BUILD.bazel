@@ -1,0 +1,45 @@
+# nautilus-infrastructure — cache, msgbus, message store backed by
+# Redis or Postgres. Cargo default enables `redis`; we leave both
+# redis and postgres OFF for phase 3 (they pull in C-backed client
+# libraries we haven't wired through Bazel yet). Adapters don't need
+# them, and the pure in-memory paths compile fine without.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_infrastructure",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = [],
+    crate_name = "nautilus_infrastructure",
+    edition = "2024",
+    proc_macro_deps = [
+        "@nt_crates//:async-trait",
+    ],
+    deps = [
+        "//crates/common:nautilus_common",
+        "//crates/core:nautilus_core",
+        "//crates/cryptography:nautilus_cryptography",
+        "//crates/model:nautilus_model",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:async-stream",
+        "@nt_crates//:bytes",
+        "@nt_crates//:chrono",
+        "@nt_crates//:derive_builder",
+        "@nt_crates//:futures",
+        "@nt_crates//:indexmap",
+        "@nt_crates//:log",
+        "@nt_crates//:regex",
+        "@nt_crates//:rmp-serde",
+        "@nt_crates//:rust_decimal",
+        "@nt_crates//:serde",
+        "@nt_crates//:serde_json",
+        "@nt_crates//:tokio",
+        "@nt_crates//:ustr",
+    ],
+)

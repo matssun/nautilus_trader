@@ -1,0 +1,43 @@
+# nautilus-execution — order management, matching, client machinery.
+#
+# Upstream Cargo.toml lists `criterion` and `rstest` as *hard*
+# (non-dev) dependencies, which is unusual — both crates are normally
+# test-only. We follow suit here so rustc's name resolution matches
+# the upstream layout.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_execution",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = [],
+    crate_name = "nautilus_execution",
+    edition = "2024",
+    proc_macro_deps = [
+        "@nt_crates//:async-trait",
+        "@nt_crates//:rust_decimal_macros",
+    ],
+    deps = [
+        "//crates/common:nautilus_common",
+        "//crates/core:nautilus_core",
+        "//crates/model:nautilus_model",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:bon",
+        "@nt_crates//:chrono",
+        "@nt_crates//:criterion",
+        "@nt_crates//:futures",
+        "@nt_crates//:log",
+        "@nt_crates//:rand",
+        "@nt_crates//:rstest",
+        "@nt_crates//:rust_decimal",
+        "@nt_crates//:serde",
+        "@nt_crates//:ustr",
+        "@nt_crates//:uuid",
+    ],
+)

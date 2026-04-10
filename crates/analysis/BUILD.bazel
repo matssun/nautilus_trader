@@ -1,0 +1,23 @@
+# nautilus-analysis — performance stats / analysis helpers.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_analysis",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = [],
+    crate_name = "nautilus_analysis",
+    edition = "2024",
+    deps = [
+        "//crates/core:nautilus_core",
+        "//crates/model:nautilus_model",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:rust_decimal",
+    ],
+)
