@@ -1,0 +1,42 @@
+# NautilusTrader — production-grade Rust-native trading engine
+#
+# This BUILD file wraps the already-built Python package as a Bazel py_library.
+# The compiled artifacts (.so files from Cython + Rust PyO3) are produced by
+# NautilusTrader's own build system via:
+#
+#     cd third_party/nautilus_trader && make build-debug   # or: make build
+#
+# That build step runs cargo + Cython and copies the .so files into
+# nautilus_trader/**/. This BUILD file then treats those .so files as
+# pre-existing artifacts and exposes everything to Bazel consumers.
+#
+# NOTE: This means `bazel build //third_party/nautilus_trader` does NOT
+# (re)compile the Rust/Cython code. The build must be run manually when
+# Rust or .pyx sources change. If the .so files are missing, downstream
+# Bazel targets will fail with import errors at runtime.
+
+load("@rules_python//python:defs.bzl", "py_library")
+
+package(default_visibility = ["//visibility:public"])
+
+py_library(
+    name = "nautilus_trader",
+    srcs = glob(
+        [
+            "nautilus_trader/**/*.py",
+        ],
+        exclude = [
+            "nautilus_trader/**/__pycache__/**",
+        ],
+    ),
+    data = glob(
+        [
+            "nautilus_trader/**/*.so",
+            "nautilus_trader/**/*.pyd",
+            "nautilus_trader/**/*.pyi",
+            "nautilus_trader/py.typed",
+        ],
+        allow_empty = True,
+    ),
+    imports = ["."],
+)
