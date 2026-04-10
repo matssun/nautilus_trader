@@ -1,0 +1,8 @@
+# Exclude Bazel convenience symlinks from package discovery.
+# These are created at build time and point into the output base;
+# they contain generated external repos that aren't resolvable from
+# either the nested or parent workspace at load time.
+bazel-bin
+bazel-nautilus_trader
+bazel-out
+bazel-testlogs
