@@ -1,0 +1,14 @@
+# Workspace root for the NautilusTrader Bazel module.
+#
+# Exposes the Cargo workspace files so that nested BUILD files (per-crate)
+# and crate_universe (in MODULE.bazel) can reference them as //:Cargo.toml,
+# //:Cargo.lock, etc.
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "Cargo.toml",
+    "Cargo.lock",
+    "pyproject.toml",
+    "rust-toolchain.toml",
+])

@@ -1,0 +1,64 @@
+# nautilus-core — fundamental building blocks (UUID, time, message types,
+# correctness primitives) used by every other nautilus crate.
+#
+# Built without the `python`, `extension-module`, or `ffi` features —
+# we want a pure-Rust library that downstream Rust consumers can link
+# against directly without pulling in PyO3 or cbindgen.
+#
+# The build.rs script reads pyproject.toml at the workspace root to
+# verify a hardcoded version constant; if the file isn't reachable in
+# Bazel's sandbox, the read returns None and the version check is
+# skipped (the script still emits the NAUTILUS_VERSION env var from the
+# hardcoded constant). We declare pyproject.toml as a build_script_data
+# anyway so the assertion runs and we'd catch any drift.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
+
+package(default_visibility = ["//visibility:public"])
+
+cargo_build_script(
+    name = "build_script",
+    srcs = ["build.rs"],
+    build_script_env = {
+        # Cargo normally sets these; rules_rust does too, but being
+        # explicit avoids surprises if rules_rust changes defaults.
+        "CARGO_PKG_VERSION": "0.56.0",
+    },
+    data = [
+        "//:Cargo.toml",
+        "//:pyproject.toml",
+    ],
+    edition = "2024",
+    deps = [
+        "@nt_crates//:toml",
+    ],
+)
+
+rust_library(
+    name = "nautilus_core",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = [],  # explicitly no features — pure Rust, no PyO3
+    crate_name = "nautilus_core",
+    edition = "2024",
+    deps = [
+        ":build_script",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:arc-swap",
+        "@nt_crates//:bytes",
+        "@nt_crates//:chrono",
+        "@nt_crates//:indexmap",
+        "@nt_crates//:log",
+        "@nt_crates//:rand",
+        "@nt_crates//:rmp-serde",
+        "@nt_crates//:rust_decimal",
+        "@nt_crates//:serde",
+        "@nt_crates//:serde_json",
+        "@nt_crates//:ustr",
+        "@nt_crates//:uuid",
+    ],
+)

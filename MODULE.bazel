@@ -1,0 +1,60 @@
+# NautilusTrader — nested Bazel module
+#
+# This MODULE.bazel makes NautilusTrader's Cargo workspace buildable via
+# Bazel without affecting any parent monorepo. It can be used in two ways:
+#
+#   1. Standalone: `cd third_party/nautilus_trader && bazel build //...`
+#      Useful for spiking, testing, and as the upstream-mergeable
+#      integration point if NautilusTrader ever accepts a Bazel build PR.
+#
+#   2. As a nested module of a parent monorepo via:
+#          bazel_dep(name = "nautilus_trader", version = "0.56.0")
+#          local_path_override(
+#              module_name = "nautilus_trader",
+#              path = "third_party/nautilus_trader",
+#          )
+#      Then targets become accessible as
+#      `@nautilus_trader//crates/core:nautilus_core` from anywhere in the
+#      parent workspace.
+#
+# Versions and toolchain pin to NautilusTrader's own requirements
+# (rust-toolchain.toml, Cargo.toml [workspace.package]) so that the
+# nested module is fully self-contained.
+
+module(
+    name = "nautilus_trader",
+    version = "0.56.0",
+)
+
+bazel_dep(name = "rules_rust", version = "0.68.1")
+bazel_dep(name = "rules_python", version = "1.7.0")
+bazel_dep(name = "rules_shell", version = "0.6.1")
+bazel_dep(name = "platforms", version = "1.0.0")
+
+########################################
+# Rust toolchain — pinned to NautilusTrader's required version
+########################################
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2024",
+    versions = ["1.94.1"],
+)
+
+########################################
+# Cargo dependencies via crate_universe
+########################################
+#
+# This reads NautilusTrader's own Cargo.toml + Cargo.lock and exposes
+# every external crate as `@nt_crates//:<crate-name>`. Workspace member
+# crates (nautilus-core, nautilus-model, ...) are NOT auto-generated;
+# they need explicit rust_library BUILD files (which is the rest of the
+# integration work).
+
+crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+crate.from_cargo(
+    name = "nt_crates",
+    cargo_lockfile = "//:Cargo.lock",
+    manifests = ["//:Cargo.toml"],
+)
+use_repo(crate, "nt_crates")

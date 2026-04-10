@@ -132,3 +132,7 @@ tests/test_data/**/backtest/**
 !tests/test_data/nautilus/*/**.parquet
 !tests/integration_tests/adapters/betfair/responses/*.log
 !/nautilus_core/adapters/src/databento/test_data/*
+
+# Bazel — added by monorepo-local-fixes branch for the nested Bazel module
+bazel-*
+MODULE.bazel.lock
