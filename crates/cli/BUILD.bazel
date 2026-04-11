@@ -1,0 +1,54 @@
+# nautilus-cli — command-line admin tool for NautilusTrader.
+# Provides a library (opt parsing, blockchain ops, database ops)
+# and a thin `nautilus` binary that wires them together.
+
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_cli",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = [
+            "src/bin/**/*.rs",
+            "src/**/tests.rs",
+        ],
+    ),
+    # `defi` pulls in nautilus-blockchain and enables blockchain
+    # subcommands. `nautilus-infrastructure` is already built with
+    # postgres on.
+    crate_features = ["defi"],
+    crate_name = "nautilus_cli",
+    edition = "2024",
+    deps = [
+        "//crates/adapters/blockchain:nautilus_blockchain",
+        "//crates/common:nautilus_common",
+        "//crates/core:nautilus_core",
+        "//crates/infrastructure:nautilus_infrastructure",
+        "//crates/model:nautilus_model",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:clap",
+        "@nt_crates//:dotenvy",
+        "@nt_crates//:log",
+        "@nt_crates//:tokio",
+        "@nt_crates//:tokio-util",
+        "@nt_crates//:ustr",
+    ],
+)
+
+rust_binary(
+    name = "nautilus",
+    srcs = ["src/bin/cli.rs"],
+    crate_features = ["defi"],
+    edition = "2024",
+    deps = [
+        ":nautilus_cli",
+        "//crates/common:nautilus_common",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:clap",
+        "@nt_crates//:dotenvy",
+        "@nt_crates//:log",
+        "@nt_crates//:tokio",
+    ],
+)

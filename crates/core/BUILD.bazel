@@ -41,7 +41,19 @@ rust_library(
         ["src/**/*.rs"],
         exclude = ["src/**/tests.rs"],
     ),
-    crate_features = [],  # explicitly no features — pure Rust, no PyO3
+    # `ffi` exposes the src/ffi/ Rust helper module (CVec,
+    # abort_on_panic, string/datetime/uuid FFI helpers). This is
+    # needed by nautilus-persistence and other Rust-side consumers
+    # that use CVec as a C-ABI-compatible Vec.
+    #
+    # Note: the build script is intentionally NOT built with `ffi`
+    # — under that feature it runs cbindgen to generate C/Cython
+    # headers to paths OUTSIDE the crate root (../../nautilus_trader/
+    # core/includes/core.h), which isn't reachable from Bazel's
+    # sandbox. We want the Rust-side helpers without the header-gen
+    # side-effect. rules_rust allows mismatched features between
+    # rust_library and cargo_build_script, so this split is valid.
+    crate_features = ["ffi"],
     crate_name = "nautilus_core",
     edition = "2024",
     deps = [

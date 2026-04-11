@@ -32,15 +32,19 @@ rust_library(
         ["src/**/*.rs"],
         exclude = ["src/**/tests.rs"],
     ),
-    # Cargo defaults (`indicators`, `rstest`) are off. `live` enables
-    # the tokio-based runtime glue (used by infrastructure / live /
-    # trading downstream). `defi` pulls in the DeFi data client
-    # messages / cache / data_actor paths (src/defi/** and
-    # src/messages/defi/**) — required by the blockchain adapter
-    # further down the chain.
+    # All upstream defaults enabled. `indicators` pulls in
+    # nautilus-indicators, `rstest` exposes the optional rstest dep
+    # for common's test fixtures (used by downstream crate tests).
+    # `live` enables the tokio-based runtime glue (used by
+    # infrastructure / live / trading downstream). `defi` pulls in
+    # the DeFi data client messages / cache / data_actor paths
+    # (src/defi/** and src/messages/defi/**) — required by the
+    # blockchain adapter.
     crate_features = [
         "defi",
+        "indicators",
         "live",
+        "rstest",
     ],
     crate_name = "nautilus_common",
     edition = "2024",
@@ -50,6 +54,7 @@ rust_library(
     deps = [
         ":build_script",
         "//crates/core:nautilus_core",
+        "//crates/indicators:nautilus_indicators",
         "//crates/model:nautilus_model",
         "@nt_crates//:ahash",
         "@nt_crates//:anyhow",
@@ -63,6 +68,7 @@ rust_library(
         "@nt_crates//:indexmap",
         "@nt_crates//:log",
         "@nt_crates//:regex",
+        "@nt_crates//:rstest",
         "@nt_crates//:rust_decimal",
         "@nt_crates//:serde",
         "@nt_crates//:serde_json",

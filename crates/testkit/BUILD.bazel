@@ -1,0 +1,41 @@
+# nautilus-testkit — test helpers (HTTP mock servers, fixture data
+# loaders, synthetic instruments). Used as a dev-dependency by
+# adapter tests; will be wired as rust_test deps in Milestone B.
+
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "nautilus_testkit",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/**/tests.rs"],
+    ),
+    crate_features = [],
+    crate_name = "nautilus_testkit",
+    edition = "2024",
+    deps = [
+        "//crates/common:nautilus_common",
+        "//crates/core:nautilus_core",
+        "//crates/model:nautilus_model",
+        "//crates/network:nautilus_network",
+        "//crates/portfolio:nautilus_portfolio",
+        "//crates/serialization:nautilus_serialization",
+        "//crates/trading:nautilus_trading",
+        "@nt_crates//:ahash",
+        "@nt_crates//:anyhow",
+        "@nt_crates//:aws-lc-rs",
+        "@nt_crates//:bon",
+        "@nt_crates//:chrono",
+        "@nt_crates//:indexmap",
+        "@nt_crates//:itchy",
+        "@nt_crates//:log",
+        "@nt_crates//:parquet",
+        "@nt_crates//:rand",
+        "@nt_crates//:reqwest",
+        "@nt_crates//:rust_decimal",
+        "@nt_crates//:serde_json",
+        "@nt_crates//:tokio",
+    ],
+)
