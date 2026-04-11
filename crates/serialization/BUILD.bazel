@@ -15,10 +15,7 @@ package(default_visibility = ["//visibility:public"])
 
 rust_library(
     name = "nautilus_serialization",
-    srcs = glob(
-        ["src/**/*.rs"],
-        exclude = ["src/**/tests.rs"],
-    ),
+    srcs = glob(["src/**/*.rs"]),
     crate_features = [
         "arrow",
         "high-precision",

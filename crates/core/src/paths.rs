@@ -71,7 +71,17 @@ mod tests {
 
     use super::*;
 
+    // These two tests assert a cargo-workspace filesystem layout
+    // relative to `CARGO_MANIFEST_DIR`. Under Bazel's sandbox the
+    // execroot does not contain the full workspace tree, so the
+    // assertions fail — not because the production code is wrong
+    // but because the tests are checking for a layout that only
+    // exists under cargo. The `#[cfg_attr(bazel_build, ignore)]`
+    // lets `bazel test` skip them while `cargo test` keeps running
+    // them unchanged. The `bazel_build` cfg is set via --cfg in
+    // the rust_test BUILD target.
     #[rstest]
+    #[cfg_attr(bazel_build, ignore)]
     fn test_workspace_root_contains_pyproject() {
         let root = get_workspace_root_path();
         assert!(
@@ -81,6 +91,7 @@ mod tests {
     }
 
     #[rstest]
+    #[cfg_attr(bazel_build, ignore)]
     fn test_workspace_root_contains_crates_dir() {
         let root = get_workspace_root_path();
         assert!(

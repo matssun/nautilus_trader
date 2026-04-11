@@ -22,10 +22,7 @@ package(default_visibility = ["//visibility:public"])
 
 rust_library(
     name = "nautilus_blockchain",
-    srcs = glob(
-        ["src/**/*.rs"],
-        exclude = ["src/**/tests.rs"],
-    ),
+    srcs = glob(["src/**/*.rs"]),
     crate_features = ["hypersync"],
     crate_name = "nautilus_blockchain",
     edition = "2024",

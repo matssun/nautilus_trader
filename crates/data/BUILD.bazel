@@ -8,10 +8,7 @@ package(default_visibility = ["//visibility:public"])
 
 rust_library(
     name = "nautilus_data",
-    srcs = glob(
-        ["src/**/*.rs"],
-        exclude = ["src/**/tests.rs"],
-    ),
+    srcs = glob(["src/**/*.rs"]),
     # `defi` enables the DeFi data client / engine paths (src/defi/**)
     # required by the blockchain adapter. No extra external deps
     # needed — the DeFi code references only workspace internals.

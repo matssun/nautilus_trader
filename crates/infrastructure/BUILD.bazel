@@ -17,10 +17,7 @@ package(default_visibility = ["//visibility:public"])
 
 rust_library(
     name = "nautilus_infrastructure",
-    srcs = glob(
-        ["src/**/*.rs"],
-        exclude = ["src/**/tests.rs"],
-    ),
+    srcs = glob(["src/**/*.rs"]),
     crate_features = ["postgres"],
     crate_name = "nautilus_infrastructure",
     edition = "2024",

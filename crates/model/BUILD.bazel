@@ -38,10 +38,7 @@ cargo_build_script(
 
 rust_library(
     name = "nautilus_model",
-    srcs = glob(
-        ["src/**/*.rs"],
-        exclude = ["src/**/tests.rs"],
-    ),
+    srcs = glob(["src/**/*.rs"]),
     # rstest's `#[fixture]` proc-macro calls `proc-macro-crate` at
     # expansion time, which reads the crate's Cargo.toml via
     # CARGO_MANIFEST_DIR. In Bazel's sandbox the file isn't present

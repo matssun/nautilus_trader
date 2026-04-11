@@ -6,10 +6,7 @@ package(default_visibility = ["//visibility:public"])
 
 rust_library(
     name = "nautilus_live",
-    srcs = glob(
-        ["src/**/*.rs"],
-        exclude = ["src/**/tests.rs"],
-    ),
+    srcs = glob(["src/**/*.rs"]),
     # `defi` gates the DataEvent::DeFi arm in runner.rs so the live
     # runtime can route DeFi data events to the engine — required by
     # the blockchain adapter.

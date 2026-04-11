@@ -11,10 +11,7 @@ package(default_visibility = ["//visibility:public"])
 
 rust_library(
     name = "nautilus_persistence",
-    srcs = glob(
-        ["src/**/*.rs"],
-        exclude = ["src/**/tests.rs"],
-    ),
+    srcs = glob(["src/**/*.rs"]),
     crate_features = [],
     crate_name = "nautilus_persistence",
     edition = "2024",

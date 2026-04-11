@@ -1,9 +1,9 @@
 # nautilus-core — fundamental building blocks (UUID, time, message types,
 # correctness primitives) used by every other nautilus crate.
 #
-# Built without the `python`, `extension-module`, or `ffi` features —
-# we want a pure-Rust library that downstream Rust consumers can link
-# against directly without pulling in PyO3 or cbindgen.
+# Built with the `ffi` feature (for the src/ffi/ Rust helper module:
+# CVec, abort_on_panic, string/datetime/uuid FFI helpers). Not built
+# with `python` or `extension-module`.
 #
 # The build.rs script reads pyproject.toml at the workspace root to
 # verify a hardcoded version constant; if the file isn't reachable in
@@ -12,7 +12,7 @@
 # hardcoded constant). We declare pyproject.toml as a build_script_data
 # anyway so the assertion runs and we'd catch any drift.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
 load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
 
 package(default_visibility = ["//visibility:public"])
@@ -25,22 +25,46 @@ cargo_build_script(
         # explicit avoids surprises if rules_rust changes defaults.
         "CARGO_PKG_VERSION": "0.56.0",
     },
-    data = [
-        "//:Cargo.toml",
-        "//:pyproject.toml",
-    ],
+    # Intentionally no data. The build script's optional
+    # pyproject.toml consistency check is a cargo-era concern
+    # (verifying cargo's Cargo.toml version matches the Python
+    # wheel's pyproject.toml version). Bazel builds neither via
+    # cargo nor a Python wheel, so the check is meaningless here.
+    # try_read_pyproject_version() returns None when the file is
+    # absent and the assertion is silently skipped.
     edition = "2024",
     deps = [
         "@nt_crates//:toml",
     ],
 )
 
+rust_test(
+    name = "nautilus_core_test",
+    # rstest's proc-macros read Cargo.toml at expansion time via
+    # proc-macro-crate — see the same compile_data on rust_library
+    # targets elsewhere in the workspace.
+    compile_data = ["Cargo.toml"],
+    crate = ":nautilus_core",
+    crate_features = ["ffi"],
+    edition = "2024",
+    proc_macro_deps = [
+        "@nt_crates//:rust_decimal_macros",
+    ],
+    # `--cfg=bazel_build` lets tests use `#[cfg_attr(bazel_build, ignore)]`
+    # to skip assertions that depend on the cargo-workspace
+    # filesystem layout (which Bazel's sandbox does not provide).
+    # Currently used by crates/core/src/paths.rs.
+    rustc_flags = ["--cfg=bazel_build"],
+    deps = [
+        "@nt_crates//:dashmap",
+        "@nt_crates//:proptest",
+        "@nt_crates//:rstest",
+    ],
+)
+
 rust_library(
     name = "nautilus_core",
-    srcs = glob(
-        ["src/**/*.rs"],
-        exclude = ["src/**/tests.rs"],
-    ),
+    srcs = glob(["src/**/*.rs"]),
     # `ffi` exposes the src/ffi/ Rust helper module (CVec,
     # abort_on_panic, string/datetime/uuid FFI helpers). This is
     # needed by nautilus-persistence and other Rust-side consumers

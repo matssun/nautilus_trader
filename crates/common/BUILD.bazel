@@ -28,10 +28,7 @@ cargo_build_script(
 
 rust_library(
     name = "nautilus_common",
-    srcs = glob(
-        ["src/**/*.rs"],
-        exclude = ["src/**/tests.rs"],
-    ),
+    srcs = glob(["src/**/*.rs"]),
     # All upstream defaults enabled. `indicators` pulls in
     # nautilus-indicators, `rstest` exposes the optional rstest dep
     # for common's test fixtures (used by downstream crate tests).
