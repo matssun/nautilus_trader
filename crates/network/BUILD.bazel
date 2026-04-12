@@ -1,14 +1,28 @@
 # nautilus-network — async HTTP/WebSocket/TLS machinery for adapters.
-# No build script, no defaults enabled.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_network_test",
+    crate = ":nautilus_network",
+    edition = "2024",
+    deps = [
+        # nautilus_common::testing::wait_until_async is used inside
+        # #[cfg(test)] in src/websocket/client.rs.
+        "//crates/common:nautilus_common",
+        "@nt_crates//:axum",
+        "@nt_crates//:proptest",
+        "@nt_crates//:rstest",
+        "@nt_crates//:tempfile",
+        "@nt_crates//:turmoil",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_network",
     srcs = glob(["src/**/*.rs"]),
-    crate_features = [],
     crate_name = "nautilus_network",
     edition = "2024",
     deps = [

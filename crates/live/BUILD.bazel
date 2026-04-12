@@ -1,15 +1,25 @@
 # nautilus-live — live trading node runtime.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_live_test",
+    crate = ":nautilus_live",
+    crate_features = ["defi"],
+    edition = "2024",
+    proc_macro_deps = ["@nt_crates//:rust_decimal_macros"],
+    # Timing-sensitive test; see comment in common/BUILD.bazel.
+    skip_tests = [
+        "live::clock::tests::test_live_timer_short_delay_not_early",
+    ],
+    deps = ["@nt_crates//:rstest"],
+)
+
+nt_rust_library(
     name = "nautilus_live",
     srcs = glob(["src/**/*.rs"]),
-    # `defi` gates the DataEvent::DeFi arm in runner.rs so the live
-    # runtime can route DeFi data events to the engine — required by
-    # the blockchain adapter.
     crate_features = ["defi"],
     crate_name = "nautilus_live",
     edition = "2024",

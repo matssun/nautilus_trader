@@ -1,10 +1,32 @@
 # nautilus-bybit — Bybit exchange adapter.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_bybit_test",
+    crate = ":nautilus_bybit",
+    # include_str!("../../test_data/...") in src/http/models.rs needs
+    # these JSON fixtures visible at compile time.
+    compile_data = glob(["test_data/**"]),
+    crate_features = ["high-precision"],
+    # src/common/testing.rs::load_test_json reads fixtures via runfiles.
+    data = glob(["test_data/**"]),
+    edition = "2024",
+    fixture_files = {
+        "BYBIT_TEST_DATA": "test_data/http_get_executions.json",
+    },
+    proc_macro_deps = ["@nt_crates//:rust_decimal_macros"],
+    deps = [
+        "//crates/testkit:nautilus_testkit",
+        "@nt_crates//:axum",
+        "@nt_crates//:rstest",
+        "@nt_crates//:url",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_bybit",
     srcs = glob(["src/**/*.rs"]),
     crate_features = ["high-precision"],

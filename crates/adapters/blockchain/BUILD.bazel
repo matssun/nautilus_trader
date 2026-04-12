@@ -1,26 +1,26 @@
 # nautilus-blockchain — DeFi / on-chain integration adapter.
 #
-# Unlike the CEX adapters, this one requires the whole `defi` feature
-# cascade through nautilus-model / common / data / live, plus
-# `postgres` on nautilus-infrastructure (its cache backs on-chain
-# state in Postgres).
-#
-# `hypersync` is enabled here, which pulls in hypersync-client and
-# hypersync-schema (Envio's HyperSync API for fast historical log
-# retrieval). Without it, the cache / data / execution / exchanges /
-# factories / services modules are all `#[cfg]`-gated off and the
-# adapter is a skeleton. The `hypersync` feature is forced on at the
-# Cargo level (default = ["hypersync"] in blockchain's Cargo.toml on
-# the monorepo-local-fixes fork) so crate_universe resolves the
-# optional hypersync-* deps.
-#
-# `python` / `extension-module` / `turmoil` are still off.
+# Requires the whole `defi` feature cascade through nautilus-model /
+# common / data / live, plus `postgres` on nautilus-infrastructure.
+# `hypersync` is forced on at the Cargo level (default = ["hypersync"]
+# in blockchain's Cargo.toml on the monorepo-local-fixes fork).
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_blockchain_test",
+    crate = ":nautilus_blockchain",
+    crate_features = ["hypersync"],
+    edition = "2024",
+    deps = [
+        "@nt_crates//:rstest",
+        "@nt_crates//:turmoil",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_blockchain",
     srcs = glob(["src/**/*.rs"]),
     crate_features = ["hypersync"],

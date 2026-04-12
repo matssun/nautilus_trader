@@ -366,10 +366,32 @@ mod tests {
 
     use super::*;
 
+    #[cfg(not(bazel_build))]
     fn load_test_data(filename: &str) -> String {
         let path = format!("test_data/{filename}");
         std::fs::read_to_string(&path)
             .unwrap_or_else(|e| panic!("Failed to load test data from {path}: {e}"))
+    }
+
+    // Under Bazel the test binary runs from the runfiles root, not the
+    // crate source directory, so the relative `test_data/...` path does
+    // not resolve. We instead ask nt_rust_test's fixture_files mechanism
+    // for a sentinel rlocationpath and derive the test_data directory
+    // from its parent.
+    #[cfg(bazel_build)]
+    fn load_test_data(filename: &str) -> String {
+        let rlocpath = std::env::var("NT_FIXTURE_KRAKEN_TEST_DATA")
+            .expect("NT_FIXTURE_KRAKEN_TEST_DATA not set by nt_rust_test fixture_files");
+        let r = runfiles::Runfiles::create().expect("failed to init runfiles");
+        let sentinel = r
+            .rlocation(&rlocpath)
+            .unwrap_or_else(|| panic!("could not resolve runfile: {rlocpath}"));
+        let dir = sentinel
+            .parent()
+            .expect("sentinel fixture should have a parent dir");
+        let path = dir.join(filename);
+        std::fs::read_to_string(&path)
+            .unwrap_or_else(|e| panic!("Failed to load test data from {}: {e}", path.display()))
     }
 
     #[rstest]

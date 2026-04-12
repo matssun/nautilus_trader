@@ -31,6 +31,16 @@ bazel_dep(name = "rules_python", version = "1.7.0")
 bazel_dep(name = "rules_shell", version = "0.6.1")
 bazel_dep(name = "platforms", version = "1.0.0")
 
+# Shared Bazel macros (nt_rust_library / nt_rust_test / fixture helpers).
+# Both this nested module and the root monorepo depend on nt_bazel_defs
+# so the same macro set is available everywhere without either side
+# reaching across repository boundaries (Bzlmod strict deps).
+bazel_dep(name = "nt_bazel_defs", version = "0.1.0")
+local_path_override(
+    module_name = "nt_bazel_defs",
+    path = "../../infrastructure/bazel_defs",
+)
+
 ########################################
 # Rust toolchain — pinned to NautilusTrader's required version
 ########################################

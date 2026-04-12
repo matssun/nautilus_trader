@@ -1515,7 +1515,7 @@ pub fn decode_statistics_msg(
 
 #[cfg(test)]
 mod tests {
-    use std::path::{Path, PathBuf};
+    use std::path::PathBuf;
 
     use databento::dbn::decode::{DecodeStream, dbn::Decoder};
     use fallible_streaming_iterator::FallibleStreamingIterator;
@@ -1524,8 +1524,28 @@ mod tests {
 
     use super::*;
 
+    // Test fixtures live at `<crate>/test_data/*.dbn[.zst]` under Cargo.
+    // Under Bazel they are declared as `data` on the nt_rust_test target
+    // and reach the test binary via runfiles; we resolve them by looking
+    // up a sentinel file's rlocationpath (passed in via
+    // NT_FIXTURE_DBN_SENTINEL) and taking its parent directory.
+    #[cfg(bazel_build)]
     fn test_data_path() -> PathBuf {
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("test_data")
+        let rlocpath = std::env::var("NT_FIXTURE_DBN_SENTINEL")
+            .expect("NT_FIXTURE_DBN_SENTINEL not set by nt_rust_test fixture_files");
+        let r = runfiles::Runfiles::create().expect("failed to init runfiles");
+        let sentinel = r
+            .rlocation(&rlocpath)
+            .unwrap_or_else(|| panic!("could not resolve runfile: {rlocpath}"));
+        sentinel
+            .parent()
+            .expect("sentinel fixture should have a parent dir")
+            .to_path_buf()
+    }
+
+    #[cfg(not(bazel_build))]
+    fn test_data_path() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_data")
     }
 
     #[rstest]

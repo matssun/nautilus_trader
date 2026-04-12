@@ -1,11 +1,40 @@
 # nautilus-databento — Databento market data adapter.
 # Default features: `live` + `high-precision`.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+# One sentinel per directory we need; tests resolve the other files by
+# calling .parent() on the sentinel path via the runfiles crate.
+# See src/decode.rs / src/loader.rs / src/factories.rs for the helpers.
+_DBN_FIXTURES = glob(["test_data/**"])
+
+nt_rust_test(
+    name = "nautilus_databento_test",
+    crate = ":nautilus_databento",
+    crate_features = [
+        "high-precision",
+        "live",
+    ],
+    data = _DBN_FIXTURES + ["publishers.json"],
+    edition = "2024",
+    fixture_files = {
+        # Sentinel used by tests to derive the test_data directory via
+        # parent(). Runfiles-resolved via the @rules_rust//rust/runfiles
+        # crate at test runtime.
+        "DBN_SENTINEL": "test_data/test_data.bbo-1m.dbn.zst",
+        "DBN_PUBLISHERS": "publishers.json",
+    },
+    deps = [
+        "//crates/testkit:nautilus_testkit",
+        "@nt_crates//:proptest",
+        "@nt_crates//:rstest",
+        "@nt_crates//:tokio",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_databento",
     srcs = glob(["src/**/*.rs"]),
     crate_features = [

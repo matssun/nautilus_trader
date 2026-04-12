@@ -20,8 +20,37 @@ use std::{fs, path::PathBuf};
 use serde_json::Value;
 
 /// Returns the path to the adapter's `test_data` directory.
+///
+/// Under Cargo, resolved at compile time via `env!("CARGO_MANIFEST_DIR")`.
+/// Under Bazel (`--cfg=bazel_build`), the compile-time manifest path is a
+/// stale sandbox path; we instead resolve a sentinel fixture (passed via
+/// `nt_rust_test(fixture_files = ...)`) through the runfiles crate and walk
+/// up to its `test_data` ancestor.
 pub fn test_data_path() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_data")
+    #[cfg(not(bazel_build))]
+    return PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_data");
+
+    #[cfg(bazel_build)]
+    {
+        use std::ffi::OsStr;
+
+        let rlocpath = std::env::var("NT_FIXTURE_BINANCE_TEST_DATA")
+            .expect("NT_FIXTURE_BINANCE_TEST_DATA not set by nt_rust_test fixture_files");
+        let r = runfiles::Runfiles::create().expect("failed to init runfiles");
+        let abs_sentinel = r
+            .rlocation(&rlocpath)
+            .unwrap_or_else(|| panic!("could not resolve runfile: {rlocpath}"));
+        let mut dir = abs_sentinel.clone();
+        while dir.file_name() != Some(OsStr::new("test_data")) {
+            if !dir.pop() {
+                panic!(
+                    "could not find 'test_data' ancestor of {}",
+                    abs_sentinel.display()
+                );
+            }
+        }
+        dir
+    }
 }
 
 /// Loads a text fixture from the adapter's `test_data` directory.

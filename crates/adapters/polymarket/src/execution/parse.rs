@@ -553,8 +553,8 @@ mod tests {
 
     #[rstest]
     fn test_parse_order_status_report_from_fixture() {
-        let path = "test_data/http_open_order.json";
-        let content = std::fs::read_to_string(path).expect("Failed to read test data");
+        let path = crate::common::testing::test_data_path("http_open_order.json");
+        let content = std::fs::read_to_string(&path).expect("Failed to read test data");
         let order: PolymarketOpenOrder =
             serde_json::from_str(&content).expect("Failed to parse test data");
 
@@ -591,8 +591,8 @@ mod tests {
 
     #[rstest]
     fn test_parse_fill_report_from_fixture() {
-        let path = "test_data/http_trade_report.json";
-        let content = std::fs::read_to_string(path).expect("Failed to read test data");
+        let path = crate::common::testing::test_data_path("http_trade_report.json");
+        let content = std::fs::read_to_string(&path).expect("Failed to read test data");
         let trade: PolymarketTradeReport =
             serde_json::from_str(&content).expect("Failed to parse test data");
 

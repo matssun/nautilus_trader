@@ -1,17 +1,24 @@
 # nautilus-data — data engine, aggregation, caches for market data.
-# No build script. Streaming / persistence feature left off (requires
-# nautilus-persistence which is not in the phase-3 build set).
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_data_test",
+    crate = ":nautilus_data",
+    crate_features = ["defi"],
+    edition = "2024",
+    deps = [
+        # alloy_primitives is used inside #[cfg(test)] in src/defi/engine.rs.
+        "@nt_crates//:alloy-primitives",
+        "@nt_crates//:rstest",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_data",
     srcs = glob(["src/**/*.rs"]),
-    # `defi` enables the DeFi data client / engine paths (src/defi/**)
-    # required by the blockchain adapter. No extra external deps
-    # needed — the DeFi code references only workspace internals.
     crate_features = ["defi"],
     crate_name = "nautilus_data",
     edition = "2024",

@@ -21,11 +21,30 @@ use std::{fs, path::PathBuf};
 #[must_use]
 /// Loads the named JSON fixture from the Bybit `test_data` directory.
 ///
+/// See `crates/adapters/deribit/src/common/testing.rs` for the Bazel runfiles
+/// pattern used under `--cfg=bazel_build`.
+///
 /// # Panics
 /// Panics if the fixture file cannot be read.
 pub fn load_test_json(file_name: &str) -> String {
-    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("test_data")
-        .join(file_name);
-    fs::read_to_string(path).expect("failed to load Bybit test fixture")
+    #[cfg(not(bazel_build))]
+    let dir: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_data");
+
+    #[cfg(bazel_build)]
+    let dir: PathBuf = {
+        let rlocpath = std::env::var("NT_FIXTURE_BYBIT_TEST_DATA")
+            .expect("NT_FIXTURE_BYBIT_TEST_DATA not set by nt_rust_test fixture_files");
+        let r = runfiles::Runfiles::create().expect("failed to init runfiles");
+        let sentinel = r
+            .rlocation(&rlocpath)
+            .unwrap_or_else(|| panic!("could not resolve runfile: {rlocpath}"));
+        sentinel
+            .parent()
+            .expect("sentinel fixture should have a parent dir")
+            .to_path_buf()
+    };
+
+    let path = dir.join(file_name);
+    fs::read_to_string(&path)
+        .unwrap_or_else(|e| panic!("failed to load Bybit test fixture {}: {e}", path.display()))
 }

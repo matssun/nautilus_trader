@@ -1,21 +1,25 @@
 # nautilus-infrastructure — cache, msgbus, message store backed by
-# Redis or Postgres. `postgres` is enabled here because the
-# blockchain adapter requires a Postgres-backed cache for on-chain
-# state (blocks, logs, pool state). `redis` (the Cargo default) is
-# still off — nothing in our build set needs it yet.
-#
-# Postgres is pulled in via `sqlx` with the `postgres` + `runtime-tokio`
-# drivers. NT's source uses only the runtime-checked `sqlx::query(...)`
-# builder and FromRow / PgRow types — NOT the `sqlx::query!` /
-# `sqlx::query_as!` compile-time-checked macros — so there is no
-# .sqlx offline query cache to wire into Bazel, and no live DB
-# connection required at build time.
+# Redis or Postgres. `postgres` is enabled here because the blockchain
+# adapter requires a Postgres-backed cache for on-chain state.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_infrastructure_test",
+    crate = ":nautilus_infrastructure",
+    crate_features = ["postgres"],
+    edition = "2024",
+    deps = [
+        "//crates/persistence:nautilus_persistence",
+        "//crates/serialization:nautilus_serialization",
+        "@nt_crates//:rstest",
+        "@nt_crates//:serde",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_infrastructure",
     srcs = glob(["src/**/*.rs"]),
     crate_features = ["postgres"],

@@ -1,15 +1,19 @@
-# nautilus-indicators — technical indicators library (moving averages,
-# RSI, MACD, order-book imbalance, etc.). Pure compute; depends only
-# on core + model.
+# nautilus-indicators — technical indicators library.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_indicators_test",
+    crate = ":nautilus_indicators",
+    edition = "2024",
+    deps = ["@nt_crates//:rstest"],
+)
+
+nt_rust_library(
     name = "nautilus_indicators",
     srcs = glob(["src/**/*.rs"]),
-    crate_features = [],
     crate_name = "nautilus_indicators",
     edition = "2024",
     deps = [

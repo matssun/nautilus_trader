@@ -1,14 +1,19 @@
-# nautilus-cryptography — crypto primitives (AWS-LC, ed25519-dalek,
-# rustls, pem). Depends on nautilus-core. No build script, no defaults.
+# nautilus-cryptography — crypto primitives.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_cryptography_test",
+    crate = ":nautilus_cryptography",
+    edition = "2024",
+    deps = ["@nt_crates//:rstest"],
+)
+
+nt_rust_library(
     name = "nautilus_cryptography",
     srcs = glob(["src/**/*.rs"]),
-    crate_features = [],
     crate_name = "nautilus_cryptography",
     edition = "2024",
     deps = [

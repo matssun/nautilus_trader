@@ -1,10 +1,31 @@
 # nautilus-dydx — dYdX v4 adapter. Cosmos SDK + gRPC + protobuf.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_dydx_test",
+    crate = ":nautilus_dydx",
+    crate_features = ["high-precision"],
+    # src/common/testing.rs::test_data_path() uses runfiles.
+    data = glob(["test_data/**"]),
+    edition = "2024",
+    fixture_files = {
+        "DYDX_TEST_DATA": "test_data/http_get_block_height.json",
+    },
+    proc_macro_deps = ["@nt_crates//:rust_decimal_macros"],
+    deps = [
+        "//crates/testkit:nautilus_testkit",
+        "//crates/trading:nautilus_trading",
+        "@nt_crates//:axum",
+        "@nt_crates//:indexmap",
+        "@nt_crates//:rstest",
+        "@nt_crates//:url",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_dydx",
     srcs = glob(["src/**/*.rs"]),
     crate_features = ["high-precision"],

@@ -1,13 +1,26 @@
 # nautilus-trading — strategy engine and controllers.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_trading_test",
+    crate = ":nautilus_trading",
+    edition = "2024",
+    proc_macro_deps = ["@nt_crates//:rust_decimal_macros"],
+    # test_twap_calculates_size_schedule_with_remainder uses
+    # #[cfg(feature = "high-precision")] guards on the TRADING crate, but
+    # high-precision is a MODEL crate feature. Upstream test bug.
+    skip_tests = [
+        "algorithm::twap::tests::test_twap_calculates_size_schedule_with_remainder",
+    ],
+    deps = ["@nt_crates//:rstest"],
+)
+
+nt_rust_library(
     name = "nautilus_trading",
     srcs = glob(["src/**/*.rs"]),
-    crate_features = [],
     crate_name = "nautilus_trading",
     edition = "2024",
     deps = [

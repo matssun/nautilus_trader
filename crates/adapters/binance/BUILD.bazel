@@ -1,11 +1,31 @@
-# nautilus-binance — Binance exchange adapter (spot + futures).
-# high-precision only; no python / extension-module.
+# nautilus-binance — Binance exchange adapter.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_binance_test",
+    crate = ":nautilus_binance",
+    crate_features = ["high-precision"],
+    # src/common/testing.rs::test_data_path() uses runfiles to resolve
+    # fixtures; declare the full set as data and pick any sentinel.
+    data = glob(["test_data/**"]),
+    edition = "2024",
+    fixture_files = {
+        "BINANCE_TEST_DATA": "test_data/SOURCES.md",
+    },
+    proc_macro_deps = ["@nt_crates//:rust_decimal_macros"],
+    deps = [
+        "//crates/testkit:nautilus_testkit",
+        "@nt_crates//:axum",
+        "@nt_crates//:dotenvy",
+        "@nt_crates//:rstest",
+        "@nt_crates//:url",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_binance",
     srcs = glob(["src/**/*.rs"]),
     crate_features = ["high-precision"],

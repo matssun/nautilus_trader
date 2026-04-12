@@ -19,6 +19,37 @@ use std::{fs, path::PathBuf};
 
 use serde::{Deserialize, de::DeserializeOwned};
 
+/// Returns the path to the `test_data` directory.
+///
+/// See `crates/adapters/binance/src/common/testing.rs` for the Bazel
+/// runfiles pattern used under `--cfg=bazel_build`.
+fn test_data_dir() -> PathBuf {
+    #[cfg(not(bazel_build))]
+    return PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_data");
+
+    #[cfg(bazel_build)]
+    {
+        use std::ffi::OsStr;
+
+        let rlocpath = std::env::var("NT_FIXTURE_BETFAIR_TEST_DATA")
+            .expect("NT_FIXTURE_BETFAIR_TEST_DATA not set by nt_rust_test fixture_files");
+        let r = runfiles::Runfiles::create().expect("failed to init runfiles");
+        let abs_sentinel = r
+            .rlocation(&rlocpath)
+            .unwrap_or_else(|| panic!("could not resolve runfile: {rlocpath}"));
+        let mut dir = abs_sentinel.clone();
+        while dir.file_name() != Some(OsStr::new("test_data")) {
+            if !dir.pop() {
+                panic!(
+                    "could not find 'test_data' ancestor of {}",
+                    abs_sentinel.display()
+                );
+            }
+        }
+        dir
+    }
+}
+
 /// Loads a JSON fixture from the adapter test data directory.
 ///
 /// # Panics
@@ -26,10 +57,7 @@ use serde::{Deserialize, de::DeserializeOwned};
 /// Panics if the test file cannot be read.
 #[must_use]
 pub fn load_test_json(file_name: &str) -> String {
-    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("test_data")
-        .join(file_name);
-
+    let path = test_data_dir().join(file_name);
     fs::read_to_string(&path).unwrap_or_else(|e| panic!("{path:?}: {e}"))
 }
 

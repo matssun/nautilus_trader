@@ -1,12 +1,10 @@
 # nautilus-cli — command-line admin tool for NautilusTrader.
-# Provides a library (opt parsing, blockchain ops, database ops)
-# and a thin `nautilus` binary that wires them together.
 
-load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_binary", "nt_rust_library")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_library(
     name = "nautilus_cli",
     srcs = glob(
         ["src/**/*.rs"],
@@ -15,9 +13,6 @@ rust_library(
             "src/**/tests.rs",
         ],
     ),
-    # `defi` pulls in nautilus-blockchain and enables blockchain
-    # subcommands. `nautilus-infrastructure` is already built with
-    # postgres on.
     crate_features = ["defi"],
     crate_name = "nautilus_cli",
     edition = "2024",
@@ -37,7 +32,7 @@ rust_library(
     ],
 )
 
-rust_binary(
+nt_rust_binary(
     name = "nautilus",
     srcs = ["src/bin/cli.rs"],
     crate_features = ["defi"],

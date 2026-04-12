@@ -1,0 +1,5 @@
+# This directory is part of the @nautilus_trader nested module.
+# Python extension build is in the parent workspace.
+# See: //third_party/nautilus_trader_py/BUILD.bazel
+
+exports_files(glob(["*.pyx", "*.pxd"]))

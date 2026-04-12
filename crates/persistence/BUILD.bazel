@@ -1,18 +1,27 @@
-# nautilus-persistence — parquet / datafusion-backed data persistence
-# layer. Heavy Arrow + parquet + datafusion + object_store deps.
-#
-# Cargo defaults are off (no python, no ffi, no cloud). The `high-precision`
-# feature is implicitly matched via nautilus-model which we already build
-# with high-precision on.
+# nautilus-persistence — parquet / datafusion-backed data persistence layer.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_persistence_test",
+    crate = ":nautilus_persistence",
+    edition = "2024",
+    deps = [
+        "//crates/testkit:nautilus_testkit",
+        "@nt_crates//:pretty_assertions",
+        "@nt_crates//:proptest",
+        "@nt_crates//:rand",
+        "@nt_crates//:rstest",
+        "@nt_crates//:rust_decimal",
+        "@nt_crates//:tempfile",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_persistence",
     srcs = glob(["src/**/*.rs"]),
-    crate_features = [],
     crate_name = "nautilus_persistence",
     edition = "2024",
     proc_macro_deps = [

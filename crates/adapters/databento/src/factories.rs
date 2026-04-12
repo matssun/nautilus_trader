@@ -338,10 +338,26 @@ mod tests {
         assert!(config.is_err());
     }
 
+    // Resolve publishers.json via Bazel runfiles (see decode.rs / loader.rs
+    // for the pattern) with a Cargo fallback to the source tree.
+    #[cfg(bazel_build)]
+    fn publishers_json_path() -> PathBuf {
+        let rlocpath = std::env::var("NT_FIXTURE_DBN_PUBLISHERS")
+            .expect("NT_FIXTURE_DBN_PUBLISHERS not set by nt_rust_test fixture_files");
+        let r = runfiles::Runfiles::create().expect("failed to init runfiles");
+        r.rlocation(&rlocpath)
+            .unwrap_or_else(|| panic!("could not resolve runfile: {rlocpath}"))
+    }
+
+    #[cfg(not(bazel_build))]
+    fn publishers_json_path() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("publishers.json")
+    }
+
     #[rstest]
     fn test_historical_client_factory() {
         let api_key = "test-000000000000000000000000000".to_string();
-        let publishers_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("publishers.json");
+        let publishers_path = publishers_json_path();
         let clock = get_atomic_clock_realtime();
 
         let result =

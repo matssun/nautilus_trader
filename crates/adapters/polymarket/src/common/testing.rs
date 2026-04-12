@@ -13,22 +13,36 @@
 //  limitations under the License.
 // -------------------------------------------------------------------------------------------------
 
+//! Test utilities for the Polymarket adapter.
+//!
+//! Upstream tests load fixtures with `format!("test_data/{filename}")`, which
+//! relies on the working directory being the crate source root — true under
+//! `cargo test` but not under Bazel, which runs tests from the runfiles root.
+//! `test_data_path(filename)` resolves the fixture regardless of build system.
+
 use std::path::PathBuf;
 
-/// Returns the path to the adapter's `test_data` directory.
+/// Returns the absolute path to a fixture file in the adapter's `test_data/`
+/// directory.
 ///
-/// See `crates/adapters/binance/src/common/testing.rs` for the Bazel
-/// runfiles pattern used under `--cfg=bazel_build`.
-fn test_data_dir() -> PathBuf {
+/// Under Cargo, `CARGO_MANIFEST_DIR` points at the actual source tree and is
+/// resolved at compile time. Under Bazel (`--cfg=bazel_build`), the
+/// compile-time manifest path is a stale sandbox path; we instead resolve a
+/// sentinel fixture (passed via `nt_rust_test(fixture_files = ...)`) through
+/// the runfiles crate and walk up to its `test_data` ancestor.
+#[must_use]
+pub fn test_data_path(filename: &str) -> PathBuf {
     #[cfg(not(bazel_build))]
-    return PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_data");
+    return PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("test_data")
+        .join(filename);
 
     #[cfg(bazel_build)]
     {
         use std::ffi::OsStr;
 
-        let rlocpath = std::env::var("NT_FIXTURE_HYPERLIQUID_TEST_DATA")
-            .expect("NT_FIXTURE_HYPERLIQUID_TEST_DATA not set by nt_rust_test fixture_files");
+        let rlocpath = std::env::var("NT_FIXTURE_POLYMARKET_TEST_DATA")
+            .expect("NT_FIXTURE_POLYMARKET_TEST_DATA not set by nt_rust_test fixture_files");
         let r = runfiles::Runfiles::create().expect("failed to init runfiles");
         let abs_sentinel = r
             .rlocation(&rlocpath)
@@ -42,19 +56,6 @@ fn test_data_dir() -> PathBuf {
                 );
             }
         }
-        dir
+        dir.join(filename)
     }
-}
-
-/// Loads and deserializes a JSON test fixture from the `test_data/` directory.
-#[expect(clippy::missing_panics_doc, reason = "test-only helper")]
-pub fn load_test_data<T>(filename: &str) -> T
-where
-    T: serde::de::DeserializeOwned,
-{
-    let path = test_data_dir().join(filename);
-    let content = std::fs::read_to_string(&path)
-        .unwrap_or_else(|e| panic!("Failed to read test data at {}: {e}", path.display()));
-    serde_json::from_str(&content)
-        .unwrap_or_else(|e| panic!("Failed to parse test data at {}: {e}", path.display()))
 }

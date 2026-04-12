@@ -454,8 +454,32 @@ mod tests {
             .join("tests/test_data/local/betfair")
     }
 
+    // See crates/adapters/betfair/src/common/testing.rs for the runfiles pattern.
+    #[cfg(not(bazel_build))]
     fn test_data_dir() -> PathBuf {
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_data")
+    }
+
+    #[cfg(bazel_build)]
+    fn test_data_dir() -> PathBuf {
+        use std::ffi::OsStr;
+
+        let rlocpath = std::env::var("NT_FIXTURE_BETFAIR_TEST_DATA")
+            .expect("NT_FIXTURE_BETFAIR_TEST_DATA not set by nt_rust_test fixture_files");
+        let r = runfiles::Runfiles::create().expect("failed to init runfiles");
+        let abs_sentinel = r
+            .rlocation(&rlocpath)
+            .unwrap_or_else(|| panic!("could not resolve runfile: {rlocpath}"));
+        let mut dir = abs_sentinel.clone();
+        while dir.file_name() != Some(OsStr::new("test_data")) {
+            if !dir.pop() {
+                panic!(
+                    "could not find 'test_data' ancestor of {}",
+                    abs_sentinel.display()
+                );
+            }
+        }
+        dir
     }
 
     #[rstest]

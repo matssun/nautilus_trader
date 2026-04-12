@@ -1,13 +1,28 @@
-# nautilus-backtest — historical backtesting engine. Depends on the
-# full core stack plus analysis / data / execution / portfolio / risk /
-# system / trading. `streaming` (which pulls in nautilus-persistence)
-# is enabled so backtests can stream from parquet files.
+# nautilus-backtest — historical backtesting engine.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_backtest_test",
+    crate = ":nautilus_backtest",
+    crate_features = [
+        "high-precision",
+        "streaming",
+    ],
+    edition = "2024",
+    deps = [
+        "//crates/indicators:nautilus_indicators",
+        "//crates/persistence:nautilus_persistence",
+        "//crates/testkit:nautilus_testkit",
+        "//crates/trading:nautilus_trading",
+        "@nt_crates//:rstest",
+        "@nt_crates//:tempfile",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_backtest",
     srcs = glob(["src/**/*.rs"]),
     crate_features = [

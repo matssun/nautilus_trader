@@ -1,11 +1,31 @@
 # nautilus-polymarket — Polymarket prediction-market adapter. Alloy
 # provider is used for EVM RPC.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_polymarket_test",
+    crate = ":nautilus_polymarket",
+    crate_features = ["high-precision"],
+    # src/common/testing.rs::test_data_path() resolves fixtures via runfiles.
+    # Upstream uses the helper from many src/ test modules that previously
+    # relied on a cwd-relative `test_data/` path.
+    data = glob(["test_data/**"]),
+    edition = "2024",
+    fixture_files = {
+        "POLYMARKET_TEST_DATA": "test_data/clob_book_response.json",
+    },
+    deps = [
+        "//crates/testkit:nautilus_testkit",
+        "//crates/trading:nautilus_trading",
+        "@nt_crates//:axum",
+        "@nt_crates//:rstest",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_polymarket",
     srcs = glob(["src/**/*.rs"]),
     crate_features = ["high-precision"],

@@ -1,10 +1,22 @@
 # nautilus-sandbox — paper-trading execution adapter.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_sandbox_test",
+    crate = ":nautilus_sandbox",
+    crate_features = ["high-precision"],
+    edition = "2024",
+    deps = [
+        "//crates/testkit:nautilus_testkit",
+        "@nt_crates//:rstest",
+        "@nt_crates//:tokio",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_sandbox",
     srcs = glob(["src/**/*.rs"]),
     crate_features = ["high-precision"],

@@ -20,4 +20,6 @@ pub mod credential;
 pub mod enums;
 pub mod models;
 pub mod parse;
+#[cfg(test)]
+pub(crate) mod testing;
 pub mod urls;

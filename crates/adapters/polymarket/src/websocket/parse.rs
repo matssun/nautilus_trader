@@ -318,8 +318,8 @@ mod tests {
     use crate::http::parse::{create_instrument_from_def, parse_gamma_market};
 
     fn load<T: serde::de::DeserializeOwned>(filename: &str) -> T {
-        let content =
-            std::fs::read_to_string(format!("test_data/{filename}")).expect("test data missing");
+        let path = crate::common::testing::test_data_path(filename);
+        let content = std::fs::read_to_string(&path).expect("test data missing");
         serde_json::from_str(&content).expect("parse failed")
     }
 

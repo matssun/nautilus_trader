@@ -376,8 +376,8 @@ mod tests {
     use super::*;
 
     fn load_gamma_market(filename: &str) -> GammaMarket {
-        let path = format!("test_data/{filename}");
-        let content = std::fs::read_to_string(path).expect("Failed to read test data");
+        let path = crate::common::testing::test_data_path(filename);
+        let content = std::fs::read_to_string(&path).expect("Failed to read test data");
         serde_json::from_str(&content).expect("Failed to parse test data")
     }
 

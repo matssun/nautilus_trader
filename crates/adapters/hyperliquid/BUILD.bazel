@@ -1,11 +1,30 @@
 # nautilus-hyperliquid — Hyperliquid perp DEX adapter. Uses alloy for
 # EVM signing.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_hyperliquid_test",
+    crate = ":nautilus_hyperliquid",
+    crate_features = ["high-precision"],
+    # src/common/testing.rs::load_test_data uses runfiles.
+    data = glob(["test_data/**"]),
+    edition = "2024",
+    fixture_files = {
+        "HYPERLIQUID_TEST_DATA": "test_data/http_l2_book_btc.json",
+    },
+    deps = [
+        "//crates/testkit:nautilus_testkit",
+        "@nt_crates//:axum",
+        "@nt_crates//:dotenvy",
+        "@nt_crates//:futures-util",
+        "@nt_crates//:rstest",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_hyperliquid",
     srcs = glob(["src/**/*.rs"]),
     crate_features = ["high-precision"],

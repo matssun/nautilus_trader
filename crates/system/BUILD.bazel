@@ -1,13 +1,18 @@
 # nautilus-system — top-level kernel / node orchestration.
-# `streaming` feature would require nautilus-persistence (not in phase
-# 3 build set). `live` feature is purely a pass-through to
-# nautilus-common/live, which we already enable unconditionally.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_system_test",
+    crate = ":nautilus_system",
+    crate_features = ["live"],
+    edition = "2024",
+    deps = ["@nt_crates//:rstest"],
+)
+
+nt_rust_library(
     name = "nautilus_system",
     srcs = glob(["src/**/*.rs"]),
     crate_features = ["live"],

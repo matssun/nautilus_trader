@@ -1,19 +1,26 @@
 # nautilus-serialization — SBE / Arrow serialization for the domain model.
-#
-# Features intentionally enabled: sbe, arrow, high-precision.
-# Cap'n Proto (`capnp`) is NOT enabled — it would require compiling
-# .capnp schemas via capnpc during the build script, which needs extra
-# Bazel wiring. The sbe + arrow path is enough for the binance / bitmex
-# adapter surface we're validating in this phase.
-#
-# The build script is a no-op in non-capnp mode (just emits a check-cfg
-# directive) so we can skip cargo_build_script entirely.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_serialization_test",
+    crate = ":nautilus_serialization",
+    crate_features = [
+        "arrow",
+        "high-precision",
+        "sbe",
+    ],
+    edition = "2024",
+    proc_macro_deps = ["@nt_crates//:rust_decimal_macros"],
+    deps = [
+        "@nt_crates//:pretty_assertions",
+        "@nt_crates//:rstest",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_serialization",
     srcs = glob(["src/**/*.rs"]),
     crate_features = [

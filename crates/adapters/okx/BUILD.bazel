@@ -1,10 +1,29 @@
 # nautilus-okx — OKX exchange adapter.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_okx_test",
+    crate = ":nautilus_okx",
+    crate_features = ["high-precision"],
+    # src/common/testing.rs::load_test_json uses runfiles.
+    data = glob(["test_data/**"]),
+    edition = "2024",
+    fixture_files = {
+        "OKX_TEST_DATA": "test_data/http_get_index_price.json",
+    },
+    proc_macro_deps = ["@nt_crates//:rust_decimal_macros"],
+    deps = [
+        "//crates/testkit:nautilus_testkit",
+        "@nt_crates//:axum",
+        "@nt_crates//:rstest",
+        "@nt_crates//:url",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_okx",
     srcs = glob(["src/**/*.rs"]),
     crate_features = ["high-precision"],

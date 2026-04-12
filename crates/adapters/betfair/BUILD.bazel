@@ -1,10 +1,32 @@
 # nautilus-betfair — Betfair exchange adapter.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_betfair_test",
+    crate = ":nautilus_betfair",
+    crate_features = ["high-precision"],
+    # src/common/testing.rs::load_test_json uses runfiles.
+    data = glob(["test_data/**"]),
+    edition = "2024",
+    fixture_files = {
+        "BETFAIR_TEST_DATA": "test_data/stream/market_definition_racing.json",
+    },
+    deps = [
+        "//crates/backtest:nautilus_backtest",
+        "//crates/execution:nautilus_execution",
+        "//crates/testkit:nautilus_testkit",
+        "//crates/trading:nautilus_trading",
+        "@nt_crates//:axum",
+        "@nt_crates//:dotenvy",
+        "@nt_crates//:rstest",
+        "@nt_crates//:tokio",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_betfair",
     srcs = glob(["src/**/*.rs"]),
     crate_features = ["high-precision"],

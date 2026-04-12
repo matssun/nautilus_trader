@@ -108,8 +108,8 @@ mod tests {
     use crate::{common::enums::PolymarketOutcome, http::models::PolymarketTradeReport};
 
     fn load<T: serde::de::DeserializeOwned>(filename: &str) -> T {
-        let path = format!("test_data/{filename}");
-        let content = std::fs::read_to_string(path).expect("Failed to read test data");
+        let path = crate::common::testing::test_data_path(filename);
+        let content = std::fs::read_to_string(&path).expect("Failed to read test data");
         serde_json::from_str(&content).expect("Failed to parse test data")
     }
 

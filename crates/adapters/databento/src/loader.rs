@@ -822,7 +822,7 @@ impl DatabentoDataLoader {
 
 #[cfg(test)]
 mod tests {
-    use std::path::{Path, PathBuf};
+    use std::path::PathBuf;
 
     use nautilus_model::types::{Price, Quantity};
     use rstest::{fixture, rstest};
@@ -830,14 +830,45 @@ mod tests {
 
     use super::*;
 
+    // See crates/adapters/databento/src/decode.rs for the runfiles pattern.
+    // NT_FIXTURE_DBN_SENTINEL and NT_FIXTURE_DBN_PUBLISHERS are set by
+    // the nt_rust_test fixture_files attribute in BUILD.bazel.
+    #[cfg(bazel_build)]
     fn test_data_path() -> PathBuf {
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("test_data")
+        let rlocpath = std::env::var("NT_FIXTURE_DBN_SENTINEL")
+            .expect("NT_FIXTURE_DBN_SENTINEL not set by nt_rust_test fixture_files");
+        let r = runfiles::Runfiles::create().expect("failed to init runfiles");
+        let sentinel = r
+            .rlocation(&rlocpath)
+            .unwrap_or_else(|| panic!("could not resolve runfile: {rlocpath}"));
+        sentinel
+            .parent()
+            .expect("sentinel fixture should have a parent dir")
+            .to_path_buf()
+    }
+
+    #[cfg(not(bazel_build))]
+    fn test_data_path() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_data")
+    }
+
+    #[cfg(bazel_build)]
+    fn publishers_json_path() -> PathBuf {
+        let rlocpath = std::env::var("NT_FIXTURE_DBN_PUBLISHERS")
+            .expect("NT_FIXTURE_DBN_PUBLISHERS not set by nt_rust_test fixture_files");
+        let r = runfiles::Runfiles::create().expect("failed to init runfiles");
+        r.rlocation(&rlocpath)
+            .unwrap_or_else(|| panic!("could not resolve runfile: {rlocpath}"))
+    }
+
+    #[cfg(not(bazel_build))]
+    fn publishers_json_path() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("publishers.json")
     }
 
     #[fixture]
     fn loader() -> DatabentoDataLoader {
-        let publishers_filepath = Path::new(env!("CARGO_MANIFEST_DIR")).join("publishers.json");
-        DatabentoDataLoader::new(Some(publishers_filepath)).unwrap()
+        DatabentoDataLoader::new(Some(publishers_json_path())).unwrap()
     }
 
     // TODO: Improve the below assertions that we've actually read the records we expected

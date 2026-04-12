@@ -1,15 +1,26 @@
 # nautilus-testkit — test helpers (HTTP mock servers, fixture data
-# loaders, synthetic instruments). Used as a dev-dependency by
-# adapter tests; will be wired as rust_test deps in Milestone B.
+# loaders, synthetic instruments).
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_testkit_test",
+    crate = ":nautilus_testkit",
+    edition = "2024",
+    proc_macro_deps = ["@nt_crates//:rust_decimal_macros"],
+    deps = [
+        "@nt_crates//:arrow",
+        "@nt_crates//:axum",
+        "@nt_crates//:rstest",
+        "@nt_crates//:tempfile",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_testkit",
     srcs = glob(["src/**/*.rs"]),
-    crate_features = [],
     crate_name = "nautilus_testkit",
     edition = "2024",
     deps = [

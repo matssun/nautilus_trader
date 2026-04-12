@@ -1,10 +1,34 @@
 # nautilus-kraken — Kraken Pro adapter.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_kraken_test",
+    crate = ":nautilus_kraken",
+    # include_str!("../../../test_data/...") in src/websocket/futures/
+    # needs JSON fixtures visible at compile time.
+    compile_data = glob(["test_data/**"]),
+    crate_features = ["high-precision"],
+    # load_test_data() in src/http/spot/models.rs, src/http/futures/models.rs
+    # and src/websocket/spot_v2/messages.rs resolves fixtures at runtime
+    # via runfiles; pass the full test_data/ set plus a sentinel.
+    data = glob(["test_data/**"]),
+    edition = "2024",
+    fixture_files = {
+        "KRAKEN_TEST_DATA": "test_data/http_asset_pairs.json",
+    },
+    deps = [
+        "//crates/testkit:nautilus_testkit",
+        "@nt_crates//:axum",
+        "@nt_crates//:dotenvy",
+        "@nt_crates//:rstest",
+        "@nt_crates//:url",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_kraken",
     srcs = glob(["src/**/*.rs"]),
     crate_features = ["high-precision"],

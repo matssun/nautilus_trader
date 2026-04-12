@@ -259,14 +259,14 @@ mod tests {
     };
 
     fn load_positions() -> Vec<DataApiPosition> {
-        let path = "test_data/data_api_positions_response.json";
-        let content = std::fs::read_to_string(path).expect("Failed to read test data");
+        let path = crate::common::testing::test_data_path("data_api_positions_response.json");
+        let content = std::fs::read_to_string(&path).expect("Failed to read test data");
         serde_json::from_str(&content).expect("Failed to parse test data")
     }
 
     fn load_trades() -> Vec<DataApiTrade> {
-        let path = "test_data/data_api_trades_response.json";
-        let content = std::fs::read_to_string(path).expect("Failed to read test data");
+        let path = crate::common::testing::test_data_path("data_api_trades_response.json");
+        let content = std::fs::read_to_string(&path).expect("Failed to read test data");
         serde_json::from_str(&content).expect("Failed to parse test data")
     }
 

@@ -1,18 +1,23 @@
 # nautilus-risk — risk management glue.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_risk_test",
+    crate = ":nautilus_risk",
+    edition = "2024",
+    proc_macro_deps = ["@nt_crates//:rust_decimal_macros"],
+    deps = ["@nt_crates//:rstest"],
+)
+
+nt_rust_library(
     name = "nautilus_risk",
     srcs = glob(["src/**/*.rs"]),
-    crate_features = [],
     crate_name = "nautilus_risk",
     edition = "2024",
-    proc_macro_deps = [
-        "@nt_crates//:rust_decimal_macros",
-    ],
+    proc_macro_deps = ["@nt_crates//:rust_decimal_macros"],
     deps = [
         "//crates/common:nautilus_common",
         "//crates/core:nautilus_core",

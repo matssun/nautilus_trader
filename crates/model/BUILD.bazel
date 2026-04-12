@@ -1,19 +1,8 @@
 # nautilus-model — domain model (instruments, orders, prices, quantities,
 # order books, greeks, plus the DeFi on-chain domain types in src/defi/).
-# Depends only on nautilus-core among workspace internals.
-#
-# Features enabled:
-#   - high-precision (128-bit price/quantity)
-#   - defi           (AMM/DEX/pool types, requires alloy-primitives)
-#   - stubs          (test-default constructors used by downstream crates)
-#
-# `ffi` and `python` are intentionally off. The build.rs script is only
-# non-trivial under the `ffi` feature; without it, it emits env vars
-# and rerun hints — we keep it wired so cargo_build_script's default
-# OUT_DIR / env forwarding still applies.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
 load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -36,24 +25,29 @@ cargo_build_script(
     deps = [],
 )
 
-rust_library(
-    name = "nautilus_model",
-    srcs = glob(["src/**/*.rs"]),
-    # rstest's `#[fixture]` proc-macro calls `proc-macro-crate` at
-    # expansion time, which reads the crate's Cargo.toml via
-    # CARGO_MANIFEST_DIR. In Bazel's sandbox the file isn't present
-    # by default, so we ship it as compile_data.
-    compile_data = ["Cargo.toml"],
+nt_rust_test(
+    name = "nautilus_model_test",
+    crate = ":nautilus_model",
     crate_features = [
-        # `defi` turns on the DeFi / on-chain domain types in
-        # src/defi/** and also requires `high-precision` implicitly
-        # for 18-decimal wei accuracy. It adds `alloy-primitives` as
-        # a required dep (see below).
         "defi",
         "high-precision",
-        # `stubs` exposes test-default constructors used by downstream
-        # crates (e.g. nautilus-common::testing). It only adds the
-        # optional `rstest` dep — no production bloat.
+        "stubs",
+    ],
+    edition = "2024",
+    deps = [
+        "@nt_crates//:proptest",
+    ],
+)
+
+nt_rust_library(
+    name = "nautilus_model",
+    srcs = glob(["src/**/*.rs"]),
+    # rstest's #[fixture] proc-macro calls proc-macro-crate at expansion
+    # time, which reads Cargo.toml via CARGO_MANIFEST_DIR.
+    compile_data = ["Cargo.toml"],
+    crate_features = [
+        "defi",
+        "high-precision",
         "stubs",
     ],
     crate_name = "nautilus_model",

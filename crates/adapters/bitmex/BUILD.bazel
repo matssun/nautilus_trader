@@ -1,10 +1,30 @@
 # nautilus-bitmex — BitMEX exchange adapter.
 
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@nt_bazel_defs//rust:defs.bzl", "nt_rust_library", "nt_rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
-rust_library(
+nt_rust_test(
+    name = "nautilus_bitmex_test",
+    crate = ":nautilus_bitmex",
+    crate_features = ["high-precision"],
+    # src/common/testing.rs::load_test_json uses runfiles to resolve fixtures.
+    data = glob(["test_data/**"]),
+    edition = "2024",
+    fixture_files = {
+        "BITMEX_TEST_DATA": "test_data/ws_trade_bin_1m.json",
+    },
+    deps = [
+        "//crates/testkit:nautilus_testkit",
+        "//crates/trading:nautilus_trading",
+        "@nt_crates//:axum",
+        "@nt_crates//:dotenvy",
+        "@nt_crates//:rstest",
+        "@nt_crates//:url",
+    ],
+)
+
+nt_rust_library(
     name = "nautilus_bitmex",
     srcs = glob(["src/**/*.rs"]),
     crate_features = ["high-precision"],
