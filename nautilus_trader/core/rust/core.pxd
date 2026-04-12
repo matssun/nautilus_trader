@@ -2,7 +2,7 @@
 
 from libc.stdint cimport uint8_t, uint64_t, uintptr_t
 
-cdef extern from "../includes/core.h":
+cdef extern from "core.h":
 
     # Number of milliseconds in one second.
     const uint64_t MILLISECONDS_IN_SECOND # = 1000

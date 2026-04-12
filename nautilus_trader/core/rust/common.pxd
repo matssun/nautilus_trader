@@ -5,7 +5,7 @@ from libc.stdint cimport uint8_t, uint32_t, uint64_t, uintptr_t
 from nautilus_trader.core.rust.core cimport CVec, UUID4_t
 from nautilus_trader.core.rust.model cimport TraderId_t
 
-cdef extern from "../includes/common.h":
+cdef extern from "common.h":
 
     # The state of a component within the system.
     cpdef enum ComponentState:

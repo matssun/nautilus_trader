@@ -5,7 +5,7 @@ from libc.stdint cimport uint8_t, uint64_t, uintptr_t
 from nautilus_trader.core.rust.common cimport TestClock_API, LiveClock_API, TimeEventHandler_t
 from nautilus_trader.core.rust.core cimport CVec, UUID4_t
 
-cdef extern from "../includes/backtest.h":
+cdef extern from "backtest.h":
 
     # Provides a means of accumulating and draining time event handlers using a priority queue.
     #
